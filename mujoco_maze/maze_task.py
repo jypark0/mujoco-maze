@@ -176,6 +176,31 @@ class DistRewardSquareRoom(GoalRewardSquareRoom, DistRewardMixIn):
     pass
 
 
+class GoalRewardLongRoom(GoalRewardUMaze):
+    MAZE_SIZE_SCALING: Scaling = Scaling(4.0, 4.0, 2.0)
+
+    def __init__(self, scale: float, goal: Tuple[float, float] = (5.0, 0.0)) -> None:
+        super().__init__(scale)
+        self.goals = [MazeGoal(np.array(goal) * scale)]
+
+    @staticmethod
+    def create_maze() -> List[List[MazeCell]]:
+        E, B, R = MazeCell.EMPTY, MazeCell.BLOCK, MazeCell.ROBOT
+        return [
+            [B, B, B, B, B, B, B, B],
+            [B, E, E, E, E, E, E, B],
+            [B, E, E, E, E, E, E, B],
+            [B, R, E, E, E, E, E, B],
+            [B, E, E, E, E, E, E, B],
+            [B, E, E, E, E, E, E, B],
+            [B, B, B, B, B, B, B, B],
+        ]
+
+
+class DistRewardLongRoom(GoalRewardUMaze):
+    pass
+
+
 class GoalRewardPush(GoalRewardUMaze):
     OBSERVE_BLOCKS: bool = True
 
@@ -766,6 +791,7 @@ class TaskRegistry:
     REGISTRY: Dict[str, List[Type[MazeTask]]] = {
         "SimpleRoom": [DistRewardSimpleRoom, GoalRewardSimpleRoom],
         "SquareRoom": [DistRewardSquareRoom, GoalRewardSquareRoom, NoRewardSquareRoom],
+        "LongRoom": [DistRewardLongRoom, GoalRewardLongRoom],
         "UMaze": [DistRewardUMaze, GoalRewardUMaze],
         "Push": [DistRewardPush, GoalRewardPush],
         "MultiPush": [DistRewardMultiPush, GoalRewardMultiPush, NoRewardMultiPush],

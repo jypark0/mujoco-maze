@@ -223,6 +223,11 @@ class MazeEnv(gym.Env):
         self._mj_offscreen_viewer = None
         self._websock_server_pipe = None
 
+        # Added to enable video_recording
+        self.metadata = {
+            "render.modes": ["human", "rgb_array", "depth_array"],
+        }
+
     @property
     def has_extended_obs(self) -> bool:
         return self._top_down_view or self._observe_blocks or self._observe_balls

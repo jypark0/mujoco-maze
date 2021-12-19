@@ -210,6 +210,23 @@ class MazeEnv(gym.Env):
                 rgba=goal.rgb.rgba_str(),
             )
 
+        # Set shaped goals
+        if hasattr(self._task, "shaped_goals"):
+            for i, goal in enumerate(self._task.shaped_goals):
+                z = goal.pos[2] if goal.dim >= 3 else 0.0
+                if goal.custom_size is None:
+                    size = f"{maze_size_scaling * 0.1}"
+                else:
+                    size = f"{goal.custom_size}"
+                ET.SubElement(
+                    worldbody,
+                    "site",
+                    name=f"shaped_goal_site{i}",
+                    pos=f"{goal.pos[0]} {goal.pos[1]} {z}",
+                    size=size,
+                    rgba=goal.rgb.rgba_str(),
+                )
+
         _, file_path = tempfile.mkstemp(text=True, suffix=".xml")
         tree.write(file_path)
         self.world_tree = tree

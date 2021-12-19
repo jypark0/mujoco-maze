@@ -40,6 +40,8 @@ setup(
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     packages=find_packages(),
+    package_data={"mujoco_maze": ["assets/*"]},
+    include_package_data=True,
     python_requires=REQUIRES_PYTHON,
     install_requires=REQUIRED,
     license="Apache2",

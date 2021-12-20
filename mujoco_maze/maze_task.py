@@ -176,95 +176,6 @@ class DistRewardSquareRoom(GoalRewardSquareRoom, DistRewardMixIn):
     pass
 
 
-class GoalRewardLongRoom(MazeTask):
-    INNER_REWARD_SCALING: float = 0
-    MAZE_SIZE_SCALING: Scaling = Scaling(4.0, 4.0, 2.0)
-    REWARD_THRESHOLD: float = 0.9
-    PENALTY: float = 0
-
-    def __init__(self, scale: float) -> None:
-        super().__init__(scale)
-        self.goals = [MazeGoal(np.array([5.0, 0.0]) * scale)]
-
-    def reward(self, obs: np.ndarray) -> float:
-        return 1.0 if self.termination(obs) else self.PENALTY
-
-    @staticmethod
-    def create_maze() -> List[List[MazeCell]]:
-        E, B, R = MazeCell.EMPTY, MazeCell.BLOCK, MazeCell.ROBOT
-        return [
-            [B, B, B, B, B, B, B, B],
-            [B, E, E, E, E, E, E, B],
-            [B, E, E, E, E, E, E, B],
-            [B, R, E, E, E, E, E, B],
-            [B, E, E, E, E, E, E, B],
-            [B, E, E, E, E, E, E, B],
-            [B, B, B, B, B, B, B, B],
-        ]
-
-
-class DistRewardLongRoom(MazeTask):
-    INNER_REWARD_SCALING: float = 0
-    MAZE_SIZE_SCALING: Scaling = Scaling(4.0, 4.0, 2.0)
-    REWARD_THRESHOLD: float = 0.9
-    PENALTY: float = 0
-    pass
-
-
-class ShapedRewardLongRoom(MazeTask):
-    INNER_REWARD_SCALING: float = 0
-    MAZE_SIZE_SCALING: Scaling = Scaling(4.0, 4.0, 2.0)
-    REWARD_THRESHOLD: float = 0.9
-    PENALTY: float = 0
-
-    def __init__(self, scale: float) -> None:
-        super().__init__(scale)
-
-        self.goals = [MazeGoal(np.array([5.0, 0.0]) * scale)]
-
-        self.shaped_goals = []
-        n_goals = 9
-        shaped_goals = [
-            (x, 0.0) for x in np.linspace(5 / (n_goals + 1), 5, n_goals, endpoint=False)
-        ]
-        rewards = np.linspace(1 / (n_goals + 1), 1, n_goals, endpoint=False)
-        for shaped_goal, reward in zip(shaped_goals, rewards):
-            self.shaped_goals.append(
-                MazeGoal(
-                    np.array(shaped_goal) * scale,
-                    reward_scale=reward,
-                    rgb=GREEN,
-                    threshold=0.2,
-                    custom_size=0.1 * scale / 2,
-                )
-            )
-
-    def reward(self, obs: np.ndarray) -> float:
-        reward = self.PENALTY
-
-        if self.termination(obs):
-            reward = 1.0
-        else:
-            for shaped_goal in self.shaped_goals:
-                if shaped_goal.neighbor(obs):
-                    reward = shaped_goal.reward_scale
-
-        return reward
-
-    @staticmethod
-    def create_maze() -> List[List[MazeCell]]:
-        E, B, R = MazeCell.EMPTY, MazeCell.BLOCK, MazeCell.ROBOT
-        return [
-            [B, B, B, B, B, B, B, B],
-            [B, E, E, E, E, E, E, B],
-            [B, E, E, E, E, E, E, B],
-            [B, R, E, E, E, E, E, B],
-            [B, E, E, E, E, E, E, B],
-            [B, E, E, E, E, E, E, B],
-            [B, B, B, B, B, B, B, B],
-        ]
-
-
 class GoalRewardPush(GoalRewardUMaze):
     OBSERVE_BLOCKS: bool = True
 
@@ -855,7 +766,6 @@ class TaskRegistry:
     REGISTRY: Dict[str, List[Type[MazeTask]]] = {
         "SimpleRoom": [DistRewardSimpleRoom, GoalRewardSimpleRoom],
         "SquareRoom": [DistRewardSquareRoom, GoalRewardSquareRoom, NoRewardSquareRoom],
-        "LongRoom": [DistRewardLongRoom, GoalRewardLongRoom, ShapedRewardLongRoom],
         "UMaze": [DistRewardUMaze, GoalRewardUMaze],
         "Push": [DistRewardPush, GoalRewardPush],
         "MultiPush": [DistRewardMultiPush, GoalRewardMultiPush, NoRewardMultiPush],

@@ -64,6 +64,10 @@ class PointEnv(AgentModel):
         )
         qvel = self.init_qvel + self.np_random.randn(self.sim.model.nv) * 0.1
 
+        # For debugging
+        # qvel = self.init_qvel
+        # qpos = self.init_qpos
+
         # Set everything other than point to original position and 0 velocity.
         qpos[3:] = self.init_qpos[3:]
         qvel[3:] = 0.0

@@ -42,6 +42,8 @@ class MazeEnv(gym.Env):
     ) -> None:
         self.t = 0  # time steps
         self._task = maze_task(maze_size_scaling, **task_kwargs)
+        # Expose task as public attribute
+        self.task = self._task
         self._maze_height = height = maze_height
         self._maze_size_scaling = size_scaling = maze_size_scaling
         self._inner_reward_scaling = inner_reward_scaling

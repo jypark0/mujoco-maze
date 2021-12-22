@@ -94,7 +94,7 @@ def expert_register(expert_task_registry):
             if point_scale is not None:
                 # Point
                 gym.envs.register(
-                    id=f"Point{maze_id}-{i}-v0",
+                    id=f"Point{maze_id}_{i}-v0",
                     entry_point="mujoco_maze.maze_env:MazeEnv",
                     kwargs=dict(
                         model_cls=PointEnv,
@@ -110,7 +110,7 @@ def expert_register(expert_task_registry):
             if ant_scale is not None:
                 # Ant
                 gym.envs.register(
-                    id=f"Ant{maze_id}-{i}-v0",
+                    id=f"Ant{maze_id}_{i}-v0",
                     entry_point="mujoco_maze.maze_env:MazeEnv",
                     kwargs=dict(
                         model_cls=AntEnv,
@@ -126,7 +126,7 @@ def expert_register(expert_task_registry):
             if swimmer_scale is not None:
                 # Reacher
                 gym.envs.register(
-                    id=f"Reacher{maze_id}-{i}-v0",
+                    id=f"Reacher{maze_id}_{i}-v0",
                     entry_point="mujoco_maze.maze_env:MazeEnv",
                     kwargs=dict(
                         model_cls=ReacherEnv,
@@ -140,7 +140,7 @@ def expert_register(expert_task_registry):
                 )
                 # Swimmer
                 gym.envs.register(
-                    id=f"Swimmer{maze_id}-{i}-v0",
+                    id=f"Swimmer{maze_id}_{i}-v0",
                     entry_point="mujoco_maze.maze_env:MazeEnv",
                     kwargs=dict(
                         model_cls=SwimmerEnv,

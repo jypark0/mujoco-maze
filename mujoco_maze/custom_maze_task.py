@@ -41,7 +41,7 @@ class DistRewardRoom3x5(MazeTask):
 
 
 class ShapedRewardRoom3x5(MazeTask):
-    INNER_REWARD_SCALING: float = 0.01
+    INNER_REWARD_SCALING: float = 0
     MAZE_SIZE_SCALING: Scaling = Scaling(4.0, 4.0, 2.0)
     REWARD_THRESHOLD: float = 0.9
     PENALTY: float = -0.001
@@ -84,10 +84,10 @@ class CustomTaskRegistry:
 
 class ExpertTaskRegistry:
     REGISTRY: Dict[str, List[Type[MazeTask]]] = {
-        "Room3x5Expert-8Goals": ShapedRewardRoom3x5,
+        "Room3x5Expert8Goals": ShapedRewardRoom3x5,
     }
     N_GOALS = {
-        "Room3x5Expert-8Goals": 8,
+        "Room3x5Expert8Goals": 8,
     }
 
     @staticmethod

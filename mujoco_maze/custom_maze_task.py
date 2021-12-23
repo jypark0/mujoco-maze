@@ -42,9 +42,9 @@ class DistRewardRoom3x5(MazeTask):
 
 class ShapedRewardRoom3x5(MazeTask):
     # INNER_REWARD_SCALING: float = 0
-    INNER_REWARD_SCALING: float = 0.001
+    INNER_REWARD_SCALING: float = 0.01
     MAZE_SIZE_SCALING: Scaling = Scaling(4.0, 4.0, 2.0)
-    REWARD_THRESHOLD: float = 0.9
+    REWARD_THRESHOLD: float = 93
     PENALTY: float = -0.001
 
     def __init__(self, scale: float, n_goals: int, goal_index: int) -> None:
@@ -55,7 +55,11 @@ class ShapedRewardRoom3x5(MazeTask):
         ]
 
     def reward(self, obs: np.ndarray) -> float:
-        return 1.0 if self.termination(obs) else self.PENALTY
+        reward = self.PENALTY
+
+        if self.termination(obs):
+            reward = 100.0
+        return reward
 
     @staticmethod
     def create_maze() -> List[List[MazeCell]]:
@@ -67,6 +71,18 @@ class ShapedRewardRoom3x5(MazeTask):
             [B, E, E, E, E, E, B],
             [B, B, B, B, B, B, B],
         ]
+
+
+class DistShapedRewardRoom3x5(ShapedRewardRoom3x5):
+    INNER_REWARD_SCALING: float = 0
+    REWARD_THRESHOLD: float = -50
+    PENALTY: float = 0
+
+    def reward(self, obs: np.ndarray) -> float:
+        reward = -self.goals[0].euc_dist(obs) / self.scale
+        if self.termination(obs):
+            reward = 100.0
+        return reward
 
 
 class CustomTaskRegistry:
@@ -85,12 +101,18 @@ class CustomTaskRegistry:
 
 class ExpertTaskRegistry:
     REGISTRY: Dict[str, List[Type[MazeTask]]] = {
-        "Room3x5Expert8Goals": ShapedRewardRoom3x5,
         "Room3x5Expert4Goals": ShapedRewardRoom3x5,
+        "Room3x5Expert8Goals": ShapedRewardRoom3x5,
+        "DistRoom3x5Expert1Goals": DistShapedRewardRoom3x5,
+        "DistRoom3x5Expert2Goals": DistShapedRewardRoom3x5,
+        "DistRoom3x5Expert4Goals": DistShapedRewardRoom3x5,
     }
     N_GOALS = {
-        "Room3x5Expert8Goals": 8,
         "Room3x5Expert4Goals": 4,
+        "Room3x5Expert8Goals": 8,
+        "DistRoom3x5Expert1Goals": 1,
+        "DistRoom3x5Expert2Goals": 2,
+        "DistRoom3x5Expert4Goals": 4,
     }
 
     @staticmethod

@@ -1,5 +1,5 @@
 """ Custom added maze tasks """
-from typing import Dict, List, NamedTuple, Optional, Tuple, Type
+from typing import Dict, List, Type
 
 import numpy as np
 
@@ -74,8 +74,9 @@ class ShapedRewardRoom3x5(MazeTask):
 
 
 class DistShapedRewardRoom3x5(ShapedRewardRoom3x5):
+    TOP_DOWN_VIEW: bool = True
     INNER_REWARD_SCALING: float = 0
-    REWARD_THRESHOLD: float = -50
+    REWARD_THRESHOLD: float = -70
     PENALTY: float = 0
 
     def reward(self, obs: np.ndarray) -> float:

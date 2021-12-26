@@ -53,10 +53,10 @@ class AgentModel(ABC, MujocoEnv, EzPickle):
 
         # View center of model
         self.viewer.cam.lookat[0] = self.model.stat.center[0]
-        self.viewer.cam.lookat[1] = self.model.stat.center[1]
+        self.viewer.cam.lookat[1] = self.model.stat.center[1] + 1
         self.viewer.cam.lookat[2] = self.model.stat.center[2]
 
-        self.viewer.cam.elevation = -60
+        self.viewer.cam.elevation = -50
         self.viewer.cam.azimuth = 90
 
     # Workaround to get camera to track agent when using mode="human"

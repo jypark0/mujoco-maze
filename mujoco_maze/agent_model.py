@@ -42,21 +42,15 @@ class AgentModel(ABC, MujocoEnv, EzPickle):
         pass
 
     def viewer_setup(self):
-        breakpoint()
         self.viewer.cam.trackbodyid = 0
-        self.viewer.cam.distance = self.model.stat.extent * 0.7
-
-        # Divide by scale
-        # self.viewer.cam.lookat[0] = self.model.stat.extent / 4
-        # self.viewer.cam.lookat[1] = 0
-        # self.viewer.cam.lookat[2] = 0
+        self.viewer.cam.distance = self.model.stat.extent * 0.6
 
         # View center of model
         self.viewer.cam.lookat[0] = self.model.stat.center[0]
-        self.viewer.cam.lookat[1] = self.model.stat.center[1] + 1
+        self.viewer.cam.lookat[1] = self.model.stat.center[1]
         self.viewer.cam.lookat[2] = self.model.stat.center[2]
 
-        self.viewer.cam.elevation = -50
+        self.viewer.cam.elevation = -60
         self.viewer.cam.azimuth = 90
 
     # Workaround to get camera to track agent when using mode="human"
@@ -109,6 +103,6 @@ class AgentModel(ABC, MujocoEnv, EzPickle):
     #
     #         if camera_id is None and camera_name in self.model._camera_name2id:
     #             camera_id = self.model.camera_name2id(camera_name)
-    #         # breakpoint()
+    #
     #         # self._get_viewer(mode).render(camera_id=camera_id)
     #         self._get_viewer(mode).render()

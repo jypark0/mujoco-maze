@@ -66,6 +66,9 @@ class MazeTask(ABC):
     # Unused now
     PUT_SPIN_NEAR_AGENT: bool = False
     TOP_DOWN_VIEW: bool = False
+    # For render
+    RENDER_WIDTH: int = 500
+    RENDER_HEIGHT: int = 500
 
     def __init__(self, scale: float) -> None:
         self.goals = []

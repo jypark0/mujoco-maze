@@ -10,7 +10,8 @@ import gym
 
 from mujoco_maze.ant import AntEnv
 from mujoco_maze.maze_task import TaskRegistry
-from mujoco_maze.custom_maze_task import CustomTaskRegistry, ExpertTaskRegistry
+from mujoco_maze.custom_maze_task import CustomTaskRegistry
+from mujoco_maze.custom_expert_maze_task import ExpertTaskRegistry
 from mujoco_maze.point import PointEnv
 from mujoco_maze.reacher import ReacherEnv
 from mujoco_maze.swimmer import SwimmerEnv

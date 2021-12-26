@@ -434,10 +434,13 @@ class MazeEnv(gym.Env):
                 self._websock_server_pipe = start_server(self._websock_port)
             return self._websock_server_pipe.send(self._render_image())
         else:
+            width, height = self._task.RENDER_WIDTH, self._task.RENDER_HEIGHT
             if self.wrapped_env.viewer is None:
-                self.wrapped_env.render(mode, **kwargs)
+                # Use render_shape specified in maze_task
+                self.wrapped_env.render(mode, width=width, height=height, **kwargs)
                 self._maybe_move_camera(self.wrapped_env.viewer)
-            return self.wrapped_env.render(mode, **kwargs)
+            # Use render_shape specified in maze_task
+            return self.wrapped_env.render(mode, width=width, height=height, **kwargs)
 
     @property
     def action_space(self):

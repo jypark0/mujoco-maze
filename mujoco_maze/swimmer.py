@@ -20,6 +20,7 @@ class SwimmerEnv(AgentModel):
     def __init__(
         self,
         file_path: str = None,
+        viewer_setup_kwargs: dict = None,
         forward_reward_weight: float = 1.0,
         ctrl_cost_weight: float = 1e-4,
         forward_reward_fn: ForwardRewardFn = forward_reward_vnorm,

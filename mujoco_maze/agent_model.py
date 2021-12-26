@@ -17,9 +17,10 @@ class AgentModel(ABC, MujocoEnv, EzPickle):
     RADIUS: Optional[float] = None
     OBJBALL_TYPE: Optional[str] = None
 
-    def __init__(self, file_path: str, frame_skip: int) -> None:
+    def __init__(self, file_path: str, frame_skip: int, viewer_setup_kwargs) -> None:
         MujocoEnv.__init__(self, file_path, frame_skip)
         EzPickle.__init__(self)
+        self.viewer_setup_kwargs = viewer_setup_kwargs
 
     def close(self):
         if self.viewer is not None and hasattr(self.viewer, "window"):
@@ -43,66 +44,68 @@ class AgentModel(ABC, MujocoEnv, EzPickle):
 
     def viewer_setup(self):
         self.viewer.cam.trackbodyid = 0
-        self.viewer.cam.distance = self.model.stat.extent * 0.6
+        self.viewer.cam.distance = (
+            self.model.stat.extent * self.viewer_setup_kwargs["distance"]
+        )
 
         # View center of model
         self.viewer.cam.lookat[0] = self.model.stat.center[0]
         self.viewer.cam.lookat[1] = self.model.stat.center[1]
         self.viewer.cam.lookat[2] = self.model.stat.center[2]
 
-        self.viewer.cam.elevation = -60
-        self.viewer.cam.azimuth = 90
+        self.viewer.cam.elevation = self.viewer_setup_kwargs["elevation"]
+        self.viewer.cam.azimuth = self.viewer_setup_kwargs["azimuth"]
 
     # Workaround to get camera to track agent when using mode="human"
-    # def render(
-    #     self,
-    #     mode="human",
-    #     width=DEFAULT_SIZE,
-    #     height=DEFAULT_SIZE,
-    #     camera_id=None,
-    #     camera_name=None,
-    # ):
-    #     if mode == "rgb_array" or mode == "depth_array":
-    #         if camera_id is not None and camera_name is not None:
-    #             raise ValueError(
-    #                 "Both `camera_id` and `camera_name` cannot be"
-    #                 " specified at the same time."
-    #             )
-    #
-    #         no_camera_specified = camera_name is None and camera_id is None
-    #         if no_camera_specified:
-    #             camera_name = "track"
-    #
-    #         if camera_id is None and camera_name in self.model._camera_name2id:
-    #             camera_id = self.model.camera_name2id(camera_name)
-    #
-    #         self._get_viewer(mode).render(width, height, camera_id=camera_id)
-    #
-    #     if mode == "rgb_array":
-    #         # window size used for old mujoco-py:
-    #         data = self._get_viewer(mode).read_pixels(width, height, depth=False)
-    #         # original image is upside-down, so flip it
-    #         return data[::-1, :, :]
-    #     elif mode == "depth_array":
-    #         self._get_viewer(mode).render(width, height)
-    #         # window size used for old mujoco-py:
-    #         # Extract depth part of the read_pixels() tuple
-    #         data = self._get_viewer(mode).read_pixels(width, height, depth=True)[1]
-    #         # original image is upside-down, so flip it
-    #         return data[::-1, :]
-    #     elif mode == "human":
-    #         if camera_id is not None and camera_name is not None:
-    #             raise ValueError(
-    #                 "Both `camera_id` and `camera_name` cannot be"
-    #                 " specified at the same time."
-    #             )
-    #
-    #         no_camera_specified = camera_name is None and camera_id is None
-    #         if no_camera_specified:
-    #             camera_name = "track"
-    #
-    #         if camera_id is None and camera_name in self.model._camera_name2id:
-    #             camera_id = self.model.camera_name2id(camera_name)
-    #
-    #         # self._get_viewer(mode).render(camera_id=camera_id)
-    #         self._get_viewer(mode).render()
+    def render(
+        self,
+        mode="human",
+        width=DEFAULT_SIZE,
+        height=DEFAULT_SIZE,
+        camera_id=None,
+        camera_name=None,
+    ):
+        if mode == "rgb_array" or mode == "depth_array":
+            if camera_id is not None and camera_name is not None:
+                raise ValueError(
+                    "Both `camera_id` and `camera_name` cannot be"
+                    " specified at the same time."
+                )
+
+            no_camera_specified = camera_name is None and camera_id is None
+            if no_camera_specified:
+                camera_name = "track"
+
+            if camera_id is None and camera_name in self.model._camera_name2id:
+                camera_id = self.model.camera_name2id(camera_name)
+
+            self._get_viewer(mode).render(width, height, camera_id=camera_id)
+
+        if mode == "rgb_array":
+            # window size used for old mujoco-py:
+            data = self._get_viewer(mode).read_pixels(width, height, depth=False)
+            # original image is upside-down, so flip it
+            return data[::-1, :, :]
+        elif mode == "depth_array":
+            self._get_viewer(mode).render(width, height)
+            # window size used for old mujoco-py:
+            # Extract depth part of the read_pixels() tuple
+            data = self._get_viewer(mode).read_pixels(width, height, depth=True)[1]
+            # original image is upside-down, so flip it
+            return data[::-1, :]
+        elif mode == "human":
+            if camera_id is not None and camera_name is not None:
+                raise ValueError(
+                    "Both `camera_id` and `camera_name` cannot be"
+                    " specified at the same time."
+                )
+
+            no_camera_specified = camera_name is None and camera_id is None
+            if no_camera_specified:
+                camera_name = "track"
+
+            if camera_id is None and camera_name in self.model._camera_name2id:
+                camera_id = self.model.camera_name2id(camera_name)
+
+            # self._get_viewer(mode).render(camera_id=camera_id)
+            self._get_viewer(mode).render()

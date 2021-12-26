@@ -69,6 +69,7 @@ class MazeTask(ABC):
     # For render
     RENDER_WIDTH: int = 500
     RENDER_HEIGHT: int = 500
+    VIEWER_SETUP_KWARGS = {"distance": 0.6, "elevation": -60, "azimuth": 90}
 
     def __init__(self, scale: float) -> None:
         self.goals = []

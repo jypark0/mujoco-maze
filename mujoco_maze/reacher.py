@@ -19,6 +19,7 @@ class ReacherEnv(AgentModel):
     def __init__(
         self,
         file_path: str = None,
+        viewer_setup_kwargs: dict = None,
         forward_reward_weight: float = 1.0,
         ctrl_cost_weight: float = 1e-4,
         forward_reward_fn: ForwardRewardFn = forward_reward_vnorm,
@@ -26,7 +27,7 @@ class ReacherEnv(AgentModel):
         self._forward_reward_weight = forward_reward_weight
         self._ctrl_cost_weight = ctrl_cost_weight
         self._forward_reward_fn = forward_reward_fn
-        super().__init__(file_path, 4)
+        super().__init__(file_path, 4, viewer_setup_kwargs)
 
     def _forward_reward(self, xy_pos_before: np.ndarray) -> Tuple[float, np.ndarray]:
         xy_pos_after = self.sim.data.qpos[:2].copy()

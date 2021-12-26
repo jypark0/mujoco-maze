@@ -49,6 +49,10 @@ class MazeEnv(gym.Env):
         self._inner_reward_scaling = inner_reward_scaling
         self._observe_blocks = self._task.OBSERVE_BLOCKS
         self._put_spin_near_agent = self._task.PUT_SPIN_NEAR_AGENT
+
+        # Viewer setup args
+        self.viewer_setup_kwargs = self._task.VIEWER_SETUP_KWARGS
+
         # Observe other objectives
         self._observe_balls = self._task.OBSERVE_BALLS
         self._top_down_view = self._task.TOP_DOWN_VIEW
@@ -232,7 +236,11 @@ class MazeEnv(gym.Env):
         _, file_path = tempfile.mkstemp(text=True, suffix=".xml")
         tree.write(file_path)
         self.world_tree = tree
-        self.wrapped_env = model_cls(file_path=file_path, **kwargs)
+        self.wrapped_env = model_cls(
+            file_path=file_path,
+            viewer_setup_kwargs=self._task.VIEWER_SETUP_KWARGS,
+            **kwargs,
+        )
         self.observation_space = self._get_obs_space()
         self._websock_port = websock_port
         self._camera_move_x = camera_move_x

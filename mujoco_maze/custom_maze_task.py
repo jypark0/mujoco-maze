@@ -90,15 +90,15 @@ class DistRewardRoom3x10(GoalRewardRoom3x10):
 
 class GoalRewardLargeUMaze(MazeTask):
     REWARD_THRESHOLD: float = 0.9
-    MAZE_SIZE_SCALING: Scaling = Scaling(4.0, 4.0, 2.0)
+    MAZE_SIZE_SCALING: Scaling = Scaling(8.0, 8.0, 4.0)
     PENALTY: float = -0.0001
     RENDER_HEIGHT = 500
     RENDER_WIDTH = 500
-    VIEWER_SETUP_KWARGS = {"distance": 1.1, "elevation": -60, "azimuth": 90}
+    VIEWER_SETUP_KWARGS = {"distance": 0.9, "elevation": -60, "azimuth": 90}
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
-        self.goals = [MazeGoal(np.array([0.0, 3.5 * scale]))]
+        self.goals = [MazeGoal(np.array([0.0, 4.0 * scale]))]
 
     def reward(self, obs: np.ndarray) -> float:
         return 1.0 if self.termination(obs) else self.PENALTY
@@ -106,17 +106,26 @@ class GoalRewardLargeUMaze(MazeTask):
     @staticmethod
     def create_maze() -> List[List[MazeCell]]:
         E, B, R = MazeCell.EMPTY, MazeCell.BLOCK, MazeCell.ROBOT
+        # return [
+        #     [B, B, B, B, B, B],
+        #     [B, E, E, E, E, B],
+        #     [B, R, E, E, E, B],
+        #     [B, E, E, E, E, B],
+        #     [B, B, B, B, E, B],
+        #     [B, B, B, B, E, B],
+        #     [B, E, E, E, E, B],
+        #     [B, E, E, E, E, B],
+        #     [B, E, E, E, E, B],
+        #     [B, B, B, B, B, B],
+        # ]
         return [
-            [B, B, B, B, B, B],
-            [B, E, E, E, E, B],
-            [B, R, E, E, E, B],
-            [B, E, E, E, E, B],
-            [B, B, B, B, E, B],
-            [B, B, B, B, E, B],
-            [B, E, E, E, E, B],
-            [B, E, E, E, E, B],
-            [B, E, E, E, E, B],
-            [B, B, B, B, B, B],
+            [B, B, B, B, B],
+            [B, R, E, E, B],
+            [B, E, E, E, B],
+            [B, B, B, E, B],
+            [B, E, E, E, B],
+            [B, E, E, E, B],
+            [B, B, B, B, B],
         ]
 
 

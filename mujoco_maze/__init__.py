@@ -85,14 +85,15 @@ def register(task_registry):
 def expert_register(expert_task_registry):
     for maze_id in expert_task_registry.keys():
         task_cls = expert_task_registry.tasks(maze_id)
-        n_goals = expert_task_registry.n_goals(maze_id)
+        goals = expert_task_registry.goals(maze_id)
+        reward_thresholds = expert_task_registry.reward_thresholds(maze_id)
 
         point_scale = task_cls.MAZE_SIZE_SCALING.point
         ant_scale = task_cls.MAZE_SIZE_SCALING.ant
         swimmer_scale = task_cls.MAZE_SIZE_SCALING.swimmer
 
-        for i in range(n_goals):
-            if point_scale is not None:
+        for i, goal in enumerate(goals):
+            if point_scale is not None and reward_thresholds.point:
                 # Point
                 gym.envs.register(
                     id=f"Point{maze_id}_{i}-v0",
@@ -100,15 +101,15 @@ def expert_register(expert_task_registry):
                     kwargs=dict(
                         model_cls=PointEnv,
                         maze_task=task_cls,
-                        task_kwargs={"n_goals": n_goals, "goal_index": i},
+                        task_kwargs={"goal": goal},
                         maze_size_scaling=point_scale,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
                     max_episode_steps=1000,
-                    reward_threshold=task_cls.REWARD_THRESHOLD,
+                    reward_threshold=reward_thresholds.point[i],
                 )
 
-            if ant_scale is not None:
+            if ant_scale is not None and reward_thresholds.ant:
                 # Ant
                 gym.envs.register(
                     id=f"Ant{maze_id}_{i}-v0",
@@ -116,15 +117,15 @@ def expert_register(expert_task_registry):
                     kwargs=dict(
                         model_cls=AntEnv,
                         maze_task=task_cls,
-                        task_kwargs={"n_goals": n_goals, "goal_index": i},
+                        task_kwargs={"goal": goal},
                         maze_size_scaling=ant_scale,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
                     max_episode_steps=1000,
-                    reward_threshold=task_cls.REWARD_THRESHOLD,
+                    reward_threshold=reward_thresholds.ant[i],
                 )
 
-            if swimmer_scale is not None:
+            if swimmer_scale is not None and reward_thresholds.swimmer:
                 # Reacher
                 gym.envs.register(
                     id=f"Reacher{maze_id}_{i}-v0",
@@ -132,12 +133,12 @@ def expert_register(expert_task_registry):
                     kwargs=dict(
                         model_cls=ReacherEnv,
                         maze_task=task_cls,
-                        task_kwargs={"n_goals": n_goals, "goal_index": i},
+                        task_kwargs={"goal": goal},
                         maze_size_scaling=task_cls.MAZE_SIZE_SCALING.swimmer,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
                     max_episode_steps=1000,
-                    reward_threshold=task_cls.REWARD_THRESHOLD,
+                    reward_threshold=reward_thresholds.swimmer[i],
                 )
                 # Swimmer
                 gym.envs.register(
@@ -146,12 +147,12 @@ def expert_register(expert_task_registry):
                     kwargs=dict(
                         model_cls=SwimmerEnv,
                         maze_task=task_cls,
-                        task_kwargs={"n_goals": n_goals, "goal_index": i},
+                        task_kwargs={"goal": goal},
                         maze_size_scaling=task_cls.MAZE_SIZE_SCALING.swimmer,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
                     max_episode_steps=1000,
-                    reward_threshold=task_cls.REWARD_THRESHOLD,
+                    reward_threshold=reward_thresholds.swimmer[i],
                 )
 
 

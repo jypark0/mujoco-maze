@@ -1,29 +1,33 @@
-""" Custom added maze tasks """
-from typing import Dict, List, Type
+""" 
+Custom added maze tasks with dense rewards and progressively farther goals
+For creating expert demonstrations
+
+"""
+from typing import Dict, List, NamedTuple, Optional, Sequence, Tuple, Type
 
 import numpy as np
 
-from mujoco_maze.maze_env_utils import MazeCell
-from mujoco_maze.maze_task import MazeTask, Scaling, MazeGoal, RED, BLUE, GREEN
-
 from mujoco_maze.custom_maze_task import (
+    GoalRewardLargeUMaze,
     GoalRewardRoom3x5,
     GoalRewardRoom3x10,
-    GoalRewardLargeUMaze,
 )
+from mujoco_maze.maze_task import MazeGoal, MazeTask
+
+
+class DistReward(NamedTuple):
+    ant: Optional[Sequence[float]]
+    point: Optional[Sequence[float]]
+    swimmer: Optional[Sequence[float]]
 
 
 class DistCurriculumRoom3x5(GoalRewardRoom3x5):
     INNER_REWARD_SCALING: float = 0.01
-    REWARD_THRESHOLD: float = -70
     PENALTY: float = 0
 
-    def __init__(self, scale: float, n_goals: int, goal_index: int) -> None:
+    def __init__(self, scale: float, goal: Tuple[float, float]) -> None:
         super().__init__(scale)
-        self.all_goals = [(i, 0.0) for i in np.linspace(4 / n_goals, 4, n_goals)]
-        self.goals = [
-            MazeGoal(np.array(self.all_goals[goal_index]) * scale, threshold=0.6)
-        ]
+        self.goals = [MazeGoal(np.array(goal) * scale, threshold=0.6)]
 
     def reward(self, obs: np.ndarray) -> float:
         reward = -self.goals[0].euc_dist(obs) / self.scale
@@ -34,17 +38,11 @@ class DistCurriculumRoom3x5(GoalRewardRoom3x5):
 
 class DistCurriculumRoom3x10(GoalRewardRoom3x10):
     INNER_REWARD_SCALING: float = 0.01
-    # Point = -70, Ant = -690
-    # REWARD_THRESHOLD: float = -70
-    REWARD_THRESHOLD: float = -690
     PENALTY: float = 0
 
-    def __init__(self, scale: float, n_goals: int, goal_index: int) -> None:
+    def __init__(self, scale: float, goal: Tuple[float, float]) -> None:
         super().__init__(scale)
-        self.all_goals = [(i, 0.0) for i in np.linspace(4 / n_goals, 4, n_goals)]
-        self.goals = [
-            MazeGoal(np.array(self.all_goals[goal_index]) * scale, threshold=0.6)
-        ]
+        self.goals = [MazeGoal(np.array(goal) * scale, threshold=0.6)]
 
     def reward(self, obs: np.ndarray) -> float:
         reward = -self.goals[0].euc_dist(obs) / self.scale
@@ -55,18 +53,11 @@ class DistCurriculumRoom3x10(GoalRewardRoom3x10):
 
 class DistCurriculumLargeUMaze(GoalRewardLargeUMaze):
     INNER_REWARD_SCALING: float = 0.01
-    REWARD_THRESHOLD: float = -700
     PENALTY: float = 0
 
-    def __init__(self, scale: float, n_goals: int, goal_index: int) -> None:
+    def __init__(self, scale: float, goal: Tuple[float, float]) -> None:
         super().__init__(scale)
-        self.all_goals = [
-            (2, 2),
-            (0, 4),
-        ]
-        self.goals = [
-            MazeGoal(np.array(self.all_goals[goal_index]) * scale, threshold=0.6)
-        ]
+        self.goals = [MazeGoal(np.array(goal) * scale, threshold=0.6)]
 
     def reward(self, obs: np.ndarray) -> float:
         reward = -self.goals[0].euc_dist(obs) / self.scale
@@ -79,12 +70,17 @@ class ExpertTaskRegistry:
     REGISTRY: Dict[str, List[Type[MazeTask]]] = {
         "DistRoom3x5_1Goals": DistCurriculumRoom3x5,
         "DistRoom3x10_1Goals": DistCurriculumRoom3x10,
-        "DistLargeUMaze_7Goals": DistCurriculumLargeUMaze,
+        "DistLargeUMaze_2Goals": DistCurriculumLargeUMaze,
     }
-    N_GOALS = {
-        "DistRoom3x5_1Goals": 1,
-        "DistRoom3x10_1Goals": 1,
-        "DistLargeUMaze_7Goals": 7,
+    GOALS = {
+        "DistRoom3x5_1Goals": [(4, 0.0)],
+        "DistRoom3x10_1Goals": [(9, 0.0)],
+        "DistLargeUMaze_2Goals": [(2, 2), (0, 4)],
+    }
+    REWARD_THRESHOLDS = {
+        "DistRoom3x5_1Goals": DistReward([-70], [-70], None),
+        "DistRoom3x10_1Goals": DistReward([-70], [-690], None),
+        "DistLargeUMaze_2Goals": DistReward([-300, -700], [-50, -100], None),
     }
 
     @staticmethod
@@ -96,5 +92,9 @@ class ExpertTaskRegistry:
         return ExpertTaskRegistry.REGISTRY[key]
 
     @staticmethod
-    def n_goals(key: str) -> List[Type[MazeTask]]:
-        return ExpertTaskRegistry.N_GOALS[key]
+    def goals(key: str) -> List[Type[MazeTask]]:
+        return ExpertTaskRegistry.GOALS[key]
+
+    @staticmethod
+    def reward_thresholds(key: str) -> List[Type[MazeTask]]:
+        return ExpertTaskRegistry.REWARD_THRESHOLDS[key]

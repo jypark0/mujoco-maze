@@ -401,6 +401,11 @@ class MazeEnv(gym.Env):
     def reset(self) -> np.ndarray:
         self.t = 0
         self.wrapped_env.reset()
+
+        # Reset waypoints if needed
+        if hasattr(self._task, "visited"):
+            self._task.visited = np.zeros(len(self._task.waypoints), dtype=bool)
+
         # Samples a new goal
         if self._task.sample_goals():
             self.set_marker()
@@ -507,7 +512,13 @@ class MazeEnv(gym.Env):
         next_obs = self._get_obs()
         inner_reward = self._inner_reward_scaling * inner_reward
         outer_reward = self._task.reward(next_obs)
-        done = self._task.termination(next_obs)
+        if hasattr(self._task, "visited"):
+            if self._task.visited.all():
+                done = self._task.termination(next_obs)
+            else:
+                done = False
+        else:
+            done = self._task.termination(next_obs)
         info["position"] = self.wrapped_env.get_xy()
         return next_obs, inner_reward + outer_reward, done, info
 

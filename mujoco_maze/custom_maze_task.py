@@ -1,18 +1,24 @@
 """ Custom added maze tasks """
-from typing import Dict, List, Type, Optional, Tuple, Sequence
+from typing import Dict, List, NamedTuple, Optional, Sequence, Type
 
 import numpy as np
 
 from mujoco_maze.maze_env_utils import MazeCell
 from mujoco_maze.maze_task import (
-    MazeTask,
-    Scaling,
-    MazeGoal,
-    DistRewardMixIn,
-    RED,
     BLUE,
     GREEN,
+    RED,
+    DistRewardMixIn,
+    MazeGoal,
+    MazeTask,
+    Scaling,
 )
+
+
+class DistReward(NamedTuple):
+    ant: Optional[Sequence[float]]
+    point: Optional[Sequence[float]]
+    swimmer: Optional[Sequence[float]]
 
 
 class GoalRewardRoom3x5(MazeTask):
@@ -20,6 +26,9 @@ class GoalRewardRoom3x5(MazeTask):
     MAZE_SIZE_SCALING: Scaling = Scaling(4.0, 4.0, 2.0)
     REWARD_THRESHOLD: float = 0.9
     PENALTY: float = 0
+    RENDER_WIDTH: int = 500
+    RENDER_HEIGHT: int = 500
+    VIEWER_SETUP_KWARGS = {"distance": 1.0, "elevation": -60, "azimuth": 90}
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -139,9 +148,9 @@ class DistSubGoalRoom3x5(GoalRewardRoom3x5):
         scale: float,
     ) -> None:
         super().__init__(scale)
-        self.goals = [MazeGoal(np.array([0.3, 0.0]) * scale)]
+        self.goals = [MazeGoal(np.array([4.0, 0.0]) * scale)]
         self.shaped_goals = []
-        for shaped_goal in [(0.1, 0), (0.2, 0)]:
+        for shaped_goal in [(1, 0), (2, 0), (3, 0)]:
             self.shaped_goals.append(
                 MazeGoal(
                     np.array(shaped_goal) * scale,
@@ -160,7 +169,44 @@ class DistSubGoalRoom3x5(GoalRewardRoom3x5):
         else:
             # Choose next subgoal
             goal_idx = np.argmax(~self.visited)
-            print(goal_idx)
+            reward = -self.shaped_goals[goal_idx].euc_dist(obs) / self.scale
+            if self.shaped_goals[goal_idx].neighbor(obs):
+                self.visited[goal_idx] = True
+                reward = 0
+        return reward
+
+
+class DistSubGoalRoom3x10(GoalRewardRoom3x10):
+    INNER_REWARD_SCALING: float = 0.01
+    PENALTY: float = 0
+    REWARD_THRESHOLD: float = 0
+
+    def __init__(
+        self,
+        scale: float,
+    ) -> None:
+        super().__init__(scale)
+        self.goals = [MazeGoal(np.array([9.0, 0.0]) * scale)]
+        self.shaped_goals = []
+        for shaped_goal in [(1, 0), (3, 0), (5, 0), (7, 0)]:
+            self.shaped_goals.append(
+                MazeGoal(
+                    np.array(shaped_goal) * scale,
+                    rgb=GREEN,
+                    custom_size=0.1 * scale / 2,
+                )
+            )
+        self.visited = np.zeros(len(self.shaped_goals), dtype=bool)
+
+    def reward(self, obs: np.ndarray) -> float:
+        # If all subgoals were visited
+        if self.visited.all():
+            reward = -self.goals[0].euc_dist(obs) / self.scale
+            if self.termination(obs):
+                reward = 0
+        else:
+            # Choose next subgoal
+            goal_idx = np.argmax(~self.visited)
             reward = -self.shaped_goals[goal_idx].euc_dist(obs) / self.scale
             if self.shaped_goals[goal_idx].neighbor(obs):
                 self.visited[goal_idx] = True
@@ -180,7 +226,7 @@ class DistSubGoalLargeUMaze(GoalRewardLargeUMaze):
         super().__init__(scale)
         self.goals = [MazeGoal(np.array([0, 4]) * scale)]
         self.shaped_goals = []
-        for shaped_goal in [(0, 0.1), (2, 1), (2, 2), (2, 3), (0, 4)]:
+        for shaped_goal in [(1, 0.5), (2, 1), (2, 2), (2, 3), (1, 3.5)]:
             self.shaped_goals.append(
                 MazeGoal(
                     np.array(shaped_goal) * scale,
@@ -192,7 +238,6 @@ class DistSubGoalLargeUMaze(GoalRewardLargeUMaze):
 
     def reward(self, obs: np.ndarray) -> float:
         # If all subgoals were visited
-        print(self.visited)
         if self.visited.all():
             reward = -self.goals[0].euc_dist(obs) / self.scale
             if self.termination(obs):
@@ -200,8 +245,6 @@ class DistSubGoalLargeUMaze(GoalRewardLargeUMaze):
         else:
             # Choose next subgoal
             goal_idx = np.argmax(~self.visited)
-            if goal_idx != 0:
-                breakpoint()
             reward = -self.shaped_goals[goal_idx].euc_dist(obs) / self.scale
             if self.shaped_goals[goal_idx].neighbor(obs):
                 self.visited[goal_idx] = True
@@ -218,6 +261,7 @@ class CustomTaskRegistry:
         "Room3x5": [GoalRewardRoom3x5, DistRewardRoom3x5],
         "Room3x5SubGoals": [DistSubGoalRoom3x5],
         "Room3x10": [GoalRewardRoom3x10, DistRewardRoom3x10],
+        "Room3x10SubGoals": [DistSubGoalRoom3x10],
         "LargeUMaze": [GoalRewardLargeUMaze, DistRewardLargeUMaze],
         "LargeUMazeSubGoals": [DistSubGoalLargeUMaze],
     }

@@ -3,7 +3,7 @@ Custom added maze tasks with dense rewards and progressively farther goals
 For creating expert demonstrations
 
 """
-from typing import Dict, List, NamedTuple, Optional, Sequence, Tuple, Type
+from typing import Dict, List, Tuple, Type
 
 import numpy as np
 
@@ -11,14 +11,9 @@ from mujoco_maze.custom_maze_task import (
     GoalRewardLargeUMaze,
     GoalRewardRoom3x5,
     GoalRewardRoom3x10,
+    DistReward,
 )
 from mujoco_maze.maze_task import MazeGoal, MazeTask
-
-
-class DistReward(NamedTuple):
-    ant: Optional[Sequence[float]]
-    point: Optional[Sequence[float]]
-    swimmer: Optional[Sequence[float]]
 
 
 class DistCurriculumRoom3x5(GoalRewardRoom3x5):
@@ -71,16 +66,21 @@ class ExpertTaskRegistry:
         "DistRoom3x5_1Goals": DistCurriculumRoom3x5,
         "DistRoom3x10_1Goals": DistCurriculumRoom3x10,
         "DistLargeUMaze_2Goals": DistCurriculumLargeUMaze,
+        "DistLargeUMaze_4Goals": DistCurriculumLargeUMaze,
     }
     GOALS = {
         "DistRoom3x5_1Goals": [(4, 0.0)],
         "DistRoom3x10_1Goals": [(9, 0.0)],
         "DistLargeUMaze_2Goals": [(2, 2), (0, 4)],
+        "DistLargeUMaze_4Goals": [(2, 1), (2, 2), (2, 3), (0, 4)],
     }
     REWARD_THRESHOLDS = {
         "DistRoom3x5_1Goals": DistReward([-70], [-70], None),
         "DistRoom3x10_1Goals": DistReward([-70], [-690], None),
         "DistLargeUMaze_2Goals": DistReward([-300, -700], [-50, -100], None),
+        "DistLargeUMaze_4Goals": DistReward(
+            [-200, -400, -600, -800], [-25, -50, -75, -100], None
+        ),
     }
 
     @staticmethod

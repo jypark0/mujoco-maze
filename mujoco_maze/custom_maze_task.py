@@ -149,16 +149,16 @@ class DistSubGoalRoom3x5(GoalRewardRoom3x5):
     ) -> None:
         super().__init__(scale)
         self.goals = [MazeGoal(np.array([4.0, 0.0]) * scale)]
-        self.shaped_goals = []
-        for shaped_goal in [(1, 0), (2, 0), (3, 0)]:
-            self.shaped_goals.append(
+        self.waypoints = []
+        for waypoint in [(1, 0), (2, 0), (3, 0)]:
+            self.waypoints.append(
                 MazeGoal(
-                    np.array(shaped_goal) * scale,
+                    np.array(waypoint) * scale,
                     rgb=GREEN,
                     custom_size=0.1 * scale / 2,
                 )
             )
-        self.visited = np.zeros(len(self.shaped_goals), dtype=bool)
+        self.visited = np.zeros(len(self.waypoints), dtype=bool)
 
     def reward(self, obs: np.ndarray) -> float:
         # If all subgoals were visited
@@ -169,8 +169,8 @@ class DistSubGoalRoom3x5(GoalRewardRoom3x5):
         else:
             # Choose next subgoal
             goal_idx = np.argmax(~self.visited)
-            reward = -self.shaped_goals[goal_idx].euc_dist(obs) / self.scale
-            if self.shaped_goals[goal_idx].neighbor(obs):
+            reward = -self.waypoints[goal_idx].euc_dist(obs) / self.scale
+            if self.waypoints[goal_idx].neighbor(obs):
                 self.visited[goal_idx] = True
                 reward = 0
         return reward
@@ -187,16 +187,16 @@ class DistSubGoalRoom3x10(GoalRewardRoom3x10):
     ) -> None:
         super().__init__(scale)
         self.goals = [MazeGoal(np.array([9.0, 0.0]) * scale)]
-        self.shaped_goals = []
-        for shaped_goal in [(1, 0), (3, 0), (5, 0), (7, 0)]:
-            self.shaped_goals.append(
+        self.waypoints = []
+        for waypoint in [(1, 0), (3, 0), (5, 0), (7, 0)]:
+            self.waypoints.append(
                 MazeGoal(
-                    np.array(shaped_goal) * scale,
+                    np.array(waypoint) * scale,
                     rgb=GREEN,
                     custom_size=0.1 * scale / 2,
                 )
             )
-        self.visited = np.zeros(len(self.shaped_goals), dtype=bool)
+        self.visited = np.zeros(len(self.waypoints), dtype=bool)
 
     def reward(self, obs: np.ndarray) -> float:
         # If all subgoals were visited
@@ -207,8 +207,8 @@ class DistSubGoalRoom3x10(GoalRewardRoom3x10):
         else:
             # Choose next subgoal
             goal_idx = np.argmax(~self.visited)
-            reward = -self.shaped_goals[goal_idx].euc_dist(obs) / self.scale
-            if self.shaped_goals[goal_idx].neighbor(obs):
+            reward = -self.waypoints[goal_idx].euc_dist(obs) / self.scale
+            if self.waypoints[goal_idx].neighbor(obs):
                 self.visited[goal_idx] = True
                 reward = 0
         return reward
@@ -225,16 +225,16 @@ class DistSubGoalLargeUMaze(GoalRewardLargeUMaze):
     ) -> None:
         super().__init__(scale)
         self.goals = [MazeGoal(np.array([0, 4]) * scale)]
-        self.shaped_goals = []
-        for shaped_goal in [(1, 0.5), (2, 1), (2, 2), (2, 3), (1, 3.5)]:
-            self.shaped_goals.append(
+        self.waypoints = []
+        for waypoint in [(1, 0.5), (2, 1), (2, 2), (2, 3), (1, 3.5)]:
+            self.waypoints.append(
                 MazeGoal(
-                    np.array(shaped_goal) * scale,
+                    np.array(waypoint) * scale,
                     rgb=GREEN,
                     custom_size=0.1 * scale / 2,
                 )
             )
-        self.visited = np.zeros(len(self.shaped_goals), dtype=bool)
+        self.visited = np.zeros(len(self.waypoints), dtype=bool)
 
     def reward(self, obs: np.ndarray) -> float:
         # If all subgoals were visited
@@ -245,8 +245,8 @@ class DistSubGoalLargeUMaze(GoalRewardLargeUMaze):
         else:
             # Choose next subgoal
             goal_idx = np.argmax(~self.visited)
-            reward = -self.shaped_goals[goal_idx].euc_dist(obs) / self.scale
-            if self.shaped_goals[goal_idx].neighbor(obs):
+            reward = -self.waypoints[goal_idx].euc_dist(obs) / self.scale
+            if self.waypoints[goal_idx].neighbor(obs):
                 self.visited[goal_idx] = True
                 reward = 0
         return reward

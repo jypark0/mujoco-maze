@@ -101,7 +101,7 @@ def expert_register(expert_task_registry):
                     kwargs=dict(
                         model_cls=PointEnv,
                         maze_task=task_cls,
-                        task_kwargs={"goal": goal},
+                        task_kwargs={"goal": goal, "waypoints": goals[:i]},
                         maze_size_scaling=point_scale,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
@@ -117,7 +117,7 @@ def expert_register(expert_task_registry):
                     kwargs=dict(
                         model_cls=AntEnv,
                         maze_task=task_cls,
-                        task_kwargs={"goal": goal},
+                        task_kwargs={"goal": goal, "waypoints": goals[:i]},
                         maze_size_scaling=ant_scale,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
@@ -133,7 +133,7 @@ def expert_register(expert_task_registry):
                     kwargs=dict(
                         model_cls=ReacherEnv,
                         maze_task=task_cls,
-                        task_kwargs={"goal": goal},
+                        task_kwargs={"goal": goal, "waypoints": goals[:i]},
                         maze_size_scaling=task_cls.MAZE_SIZE_SCALING.swimmer,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
@@ -147,7 +147,7 @@ def expert_register(expert_task_registry):
                     kwargs=dict(
                         model_cls=SwimmerEnv,
                         maze_task=task_cls,
-                        task_kwargs={"goal": goal},
+                        task_kwargs={"goal": goal, "waypoints": goals[:i]},
                         maze_size_scaling=task_cls.MAZE_SIZE_SCALING.swimmer,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),

@@ -53,6 +53,9 @@ class Room3x5WayPoint(Room3x5):
             )
         self.visited = np.zeros(len(self.waypoints), dtype=bool)
 
+        self.goal_reward = 1000
+        self.waypoint_reward = 0
+
         # Precalculate distances b/w waypoints
         self.rews = np.zeros(len(self.waypoints) + 1)
         self.rews[0] = -euc_dist(self.waypoints[0].pos, [0, 0]) / self.scale
@@ -69,7 +72,7 @@ class Room3x5WayPoint(Room3x5):
         if self.visited.all():
             reward = -self.goals[0].euc_dist(obs) / self.scale
             if self.termination(obs):
-                reward = 100
+                reward = self.goal_reward
         else:
             # Choose next waypoint
             goal_idx = np.argmax(~self.visited)
@@ -78,7 +81,7 @@ class Room3x5WayPoint(Room3x5):
 
             if self.waypoints[goal_idx].neighbor(obs):
                 self.visited[goal_idx] = True
-                reward += 100
+                reward += self.waypoint_reward
             else:
                 reward += -self.waypoints[goal_idx].euc_dist(obs) / self.scale
         return reward

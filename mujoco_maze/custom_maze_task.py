@@ -194,7 +194,7 @@ class DistLargeUMazeWayPoint(GoalRewardLargeUMaze):
         super().__init__(scale)
         self.goals = [MazeGoal(np.array([0, 4]) * scale, threshold=0.6)]
         self.waypoints = []
-        for waypoint in [(2, 2)]:
+        for waypoint in [(2, 2), (1.5, 3)]:
             self.waypoints.append(
                 MazeGoal(
                     np.array(waypoint) * scale,
@@ -205,7 +205,7 @@ class DistLargeUMazeWayPoint(GoalRewardLargeUMaze):
         self.visited = np.zeros(len(self.waypoints), dtype=bool)
 
         self.goal_reward = 1000
-        self.waypoint_reward = 0
+        self.waypoint_reward = 500
 
         # Precalculate distances b/w waypoints
         self.rews = np.zeros(len(self.waypoints) + 1)

@@ -14,6 +14,7 @@ from typing import Any, List, Optional, Tuple, Type
 
 import gym
 import numpy as np
+from gym.utils import seeding
 
 from mujoco_maze import maze_env_utils, maze_task
 from mujoco_maze.agent_model import AgentModel
@@ -27,6 +28,8 @@ class MazeEnv(gym.Env):
         self,
         model_cls: Type[AgentModel],
         maze_task: Type[maze_task.MazeTask] = maze_task.MazeTask,
+        random_start: bool = False,
+        init_position: Optional[Tuple[float, float]] = None,
         include_position: bool = True,
         maze_height: float = 0.5,
         maze_size_scaling: float = 4.0,
@@ -44,6 +47,10 @@ class MazeEnv(gym.Env):
         self._task = maze_task(maze_size_scaling, **task_kwargs)
         # Expose task as public attribute
         self.task = self._task
+
+        self.random_start = random_start
+        self.init_position = init_position
+
         self._maze_height = height = maze_height
         self._maze_size_scaling = size_scaling = maze_size_scaling
         self._inner_reward_scaling = inner_reward_scaling
@@ -250,10 +257,55 @@ class MazeEnv(gym.Env):
         self._mj_offscreen_viewer = None
         self._websock_server_pipe = None
 
+        # Check that init_position is valid
+        xmin, xmax, ymin, ymax = self._xy_limits()
+        if (
+            xmin <= self.init_position[0] <= xmax
+            and ymin <= self.init_position[1] <= ymax
+        ):
+            raise ValueError(f"{self.init_position} is not within limits")
+
         # Added to enable video_recording
         self.metadata = {
-            "render.modes": ["human", "rgb_array", "depth_array"],
+            "render.modes": ["human", "rgb_array", "depth_array", "top_down"],
         }
+
+    def seed(self, seed=None):
+        self.np_random, seed = seeding.np_random(seed)
+        return [seed]
+
+    def get_top_down_map(self):
+        structure = self._maze_structure
+        size_scaling = self._maze_size_scaling
+
+        tile_size = 1
+
+        # Calculate cell_size
+        cell_size = int(tile_size * size_scaling)
+
+        # Map size: W x H x 3 (RGB)
+        map_view = 255 * (
+            np.ones(
+                (cell_size * len(structure), cell_size * len(structure[0]), 3),
+                dtype=np.uint8,
+            )
+        )
+
+        for i in range(len(structure)):
+            for j in range(len(structure[0])):
+                if structure[i][j].is_block():
+                    # Walls are gray
+                    map_view[
+                        cell_size * i : cell_size * (i + 1),
+                        cell_size * j : cell_size * (j + 1),
+                        :,
+                    ] = 100
+
+        # X is horizontal, y is vertical for map (camera azimuth is 90)
+        shift_x = tile_size * self._init_torso_x + (size_scaling * 0.5)
+        shift_y = tile_size * self._init_torso_y + (size_scaling * 0.5)
+
+        return map_view, tile_size, (shift_x, shift_y)
 
     @property
     def has_extended_obs(self) -> bool:
@@ -288,6 +340,10 @@ class MazeEnv(gym.Env):
         xmin, xmax = (xmin - 0.5) * scaling - x0, (xmax + 0.5) * scaling - x0
         ymin, ymax = (ymin - 0.5) * scaling - y0, (ymax + 0.5) * scaling - y0
         return xmin, xmax, ymin, ymax
+
+    # Public method
+    def xy_limits(self) -> Tuple[float, float, float, float]:
+        return self._xy_limits()
 
     def get_top_down_view(self) -> np.ndarray:
         self._view = np.zeros_like(self._view)
@@ -411,8 +467,18 @@ class MazeEnv(gym.Env):
             self.set_marker()
         # Samples a new start position
         if len(self._init_positions) > 1:
-            xy = np.random.choice(self._init_positions)
+            xy = self.np_random.choice(self._init_positions)
             self.wrapped_env.set_xy(xy)
+
+        # Set initial position if given
+        if self.init_position is not None:
+            self.wrapped_env.set_xy(xy)
+        # Samples random start position
+        elif self.random_start:
+            xmin, xmax, ymin, ymax = self._xy_limits()
+            xy = self.np_random.uniform([xmin, ymin], [xmax, ymax], 2)
+            self.wrapped_env.set_xy(xy)
+
         return self._get_obs()
 
     def set_marker(self) -> None:

@@ -259,11 +259,11 @@ class MazeEnv(gym.Env):
 
         # Check that init_position is valid
         xmin, xmax, ymin, ymax = self._xy_limits()
-        if (
-            xmin <= self.init_position[0] <= xmax
-            and ymin <= self.init_position[1] <= ymax
-        ):
-            raise ValueError(f"{self.init_position} is not within limits")
+        if init_position is not None:
+            if not (xmin <= self.init_position[0] <= xmax) or not (
+                ymin <= self.init_position[1] <= ymax
+            ):
+                raise ValueError(f"{self.init_position} is not within limits")
 
         # Added to enable video_recording
         self.metadata = {
@@ -472,7 +472,7 @@ class MazeEnv(gym.Env):
 
         # Set initial position if given
         if self.init_position is not None:
-            self.wrapped_env.set_xy(xy)
+            self.wrapped_env.set_xy(np.asarray(self.init_position))
         # Samples random start position
         elif self.random_start:
             xmin, xmax, ymin, ymax = self._xy_limits()

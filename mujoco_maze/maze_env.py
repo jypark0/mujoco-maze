@@ -459,12 +459,16 @@ class MazeEnv(gym.Env):
         self.wrapped_env.reset()
 
         # Reset waypoints if needed
-        if hasattr(self._task, "visited"):
-            self._task.visited = np.zeros(len(self._task.waypoints), dtype=bool)
+        # if hasattr(self._task, "visited"):
+        #     self._task.visited = np.zeros(len(self._task.waypoints), dtype=bool)
+        if hasattr(self._task, "waypoint_idx"):
+            self._task.waypoint_idx = 0
+            self._task.current_goal = self._task.waypoints[self._task.waypoint_idx]
 
         # Samples a new goal
         if self._task.sample_goals():
             self.set_marker()
+
         # Samples a new start position
         if len(self._init_positions) > 1:
             xy = self.np_random.choice(self._init_positions)
@@ -473,6 +477,7 @@ class MazeEnv(gym.Env):
         # Set initial position if given
         if self.init_position is not None:
             self.wrapped_env.set_xy(np.asarray(self.init_position))
+
         # Samples random start position
         elif self.random_start:
             xmin, xmax, ymin, ymax = self._xy_limits()
@@ -578,13 +583,14 @@ class MazeEnv(gym.Env):
         next_obs = self._get_obs()
         inner_reward = self._inner_reward_scaling * inner_reward
         outer_reward = self._task.reward(next_obs)
-        if hasattr(self._task, "visited"):
-            if self._task.visited.all():
-                done = self._task.termination(next_obs)
-            else:
-                done = False
-        else:
-            done = self._task.termination(next_obs)
+        # if hasattr(self._task, "visited"):
+        #     if self._task.visited.all():
+        #         done = self._task.termination(next_obs)
+        #     else:
+        #         done = False
+        # else:
+        #     done = self._task.termination(next_obs)
+        done = self._task.termination(next_obs)
         info["position"] = self.wrapped_env.get_xy()
         return next_obs, inner_reward + outer_reward, done, info
 

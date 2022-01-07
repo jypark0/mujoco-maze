@@ -1,106 +1,12 @@
 """Maze tasks that are defined by their map, termination condition, and goals.
 """
 
-from abc import ABC, abstractmethod
-from typing import Dict, List, NamedTuple, Optional, Tuple, Type
+from typing import Dict, List, Tuple, Type
 
 import numpy as np
 
 from mujoco_maze.maze_env_utils import MazeCell
-
-
-class Rgb(NamedTuple):
-    red: float
-    green: float
-    blue: float
-
-    def rgba_str(self) -> str:
-        return f"{self.red} {self.green} {self.blue} 1"
-
-
-RED = Rgb(0.7, 0.1, 0.1)
-GREEN = Rgb(0.1, 0.7, 0.1)
-BLUE = Rgb(0.1, 0.1, 0.7)
-
-
-class MazeGoal:
-    def __init__(
-        self,
-        pos: np.ndarray,
-        reward_scale: float = 1.0,
-        rgb: Rgb = RED,
-        threshold: float = 0.6,
-        custom_size: Optional[float] = None,
-    ) -> None:
-        assert 0.0 <= reward_scale <= 1.0
-        self.pos = pos
-        self.dim = pos.shape[0]
-        self.reward_scale = reward_scale
-        self.rgb = rgb
-        self.threshold = threshold
-        self.custom_size = custom_size
-
-    def neighbor(self, obs: np.ndarray) -> float:
-        return np.linalg.norm(obs[: self.dim] - self.pos) <= self.threshold
-
-    def euc_dist(self, obs: np.ndarray) -> float:
-        return np.sum(np.square(obs[: self.dim] - self.pos)) ** 0.5
-
-
-class Scaling(NamedTuple):
-    ant: Optional[float]
-    point: Optional[float]
-    swimmer: Optional[float]
-
-
-class MazeTask(ABC):
-    REWARD_THRESHOLD: float
-    PENALTY: Optional[float] = None
-    MAZE_SIZE_SCALING: Scaling = Scaling(ant=8.0, point=4.0, swimmer=4.0)
-    INNER_REWARD_SCALING: float = 0.01
-    # For Fall/Push/BlockMaze
-    OBSERVE_BLOCKS: bool = False
-    # For Billiard
-    OBSERVE_BALLS: bool = False
-    OBJECT_BALL_SIZE: float = 1.0
-    # Unused now
-    PUT_SPIN_NEAR_AGENT: bool = False
-    TOP_DOWN_VIEW: bool = False
-    # For render
-    RENDER_WIDTH: int = 500
-    RENDER_HEIGHT: int = 500
-    VIEWER_SETUP_KWARGS = {"distance": 0.6, "elevation": -60, "azimuth": 90}
-
-    def __init__(self, scale: float) -> None:
-        self.goals = []
-        self.scale = scale
-
-    def sample_goals(self) -> bool:
-        return False
-
-    def termination(self, obs: np.ndarray) -> bool:
-        for goal in self.goals:
-            if goal.neighbor(obs):
-                return True
-        return False
-
-    @abstractmethod
-    def reward(self, obs: np.ndarray) -> float:
-        pass
-
-    @staticmethod
-    @abstractmethod
-    def create_maze() -> List[List[MazeCell]]:
-        pass
-
-
-class DistRewardMixIn:
-    REWARD_THRESHOLD: float = -1000.0
-    goals: List[MazeGoal]
-    scale: float
-
-    def reward(self, obs: np.ndarray) -> float:
-        return -self.goals[0].euc_dist(obs) / self.scale
+from mujoco_maze.task_common import MazeGoal, MazeTask, DistRewardMixIn, Scaling, GREEN
 
 
 class GoalRewardUMaze(MazeTask):

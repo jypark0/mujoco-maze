@@ -36,7 +36,7 @@ def q_mult(a, b):  # multiply two quaternion
 
 
 class AntEnv(AgentModel):
-    FILE: str = "ant.xml"
+    FILE: str = "ant_dt3_gear10.xml"
     ORI_IND: int = 3
     MANUAL_COLLISION: bool = False
     OBJBALL_TYPE: str = "freejoint"
@@ -48,8 +48,8 @@ class AntEnv(AgentModel):
         forward_reward_weight: float = 1.0,
         ctrl_cost_weight: float = 0.5,
         contact_cost_weight: float = 5e-4,
-        healthy_reward: float = 1.0,
-        terminate_when_unhealthy: bool = True,
+        healthy_reward: float = 1,
+        terminate_when_unhealthy: bool = False,
         healthy_z_range: Tuple[float, float] = (0.2, 1.0),
         contact_force_range: Tuple[float, float] = (-1.0, 1.0),
         reset_noise_scale: float = 0.1,
@@ -69,7 +69,7 @@ class AntEnv(AgentModel):
         super().__init__(file_path, 5, viewer_setup_kwargs)
 
     def _forward_reward(self, xy_pos_before: np.ndarray) -> Tuple[float, np.ndarray]:
-        xy_pos_after = self.sim.data.qpos[:2].copy()
+        xy_pos_after = self.get_body_com("torso")[:2].copy()
         xy_velocity = (xy_pos_after - xy_pos_before) / self.dt
         return self._forward_reward_fn(xy_velocity)
 

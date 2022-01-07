@@ -3,7 +3,7 @@ Custom added maze tasks with dense rewards and progressively farther goals
 For creating expert demonstrations
 
 """
-from typing import Dict, List, NamedTuple, Optional, Sequence, Type, Tuple
+from typing import Dict, List, Type, Tuple
 
 import numpy as np
 
@@ -11,16 +11,14 @@ from mujoco_maze.custom_maze_task import (
     GoalRewardLargeUMaze,
     GoalRewardRoom3x5,
     GoalRewardRoom3x10,
-    DistReward,
-    euc_dist,
 )
-from mujoco_maze.maze_task import MazeGoal, MazeTask, GREEN
-
-
-class DistRewardList(NamedTuple):
-    ant: Optional[Sequence[float]]
-    point: Optional[Sequence[float]]
-    swimmer: Optional[Sequence[float]]
+from mujoco_maze.task_common import (
+    MazeGoal,
+    MazeTask,
+    GREEN,
+    euc_dist,
+    RewardThresholdList,
+)
 
 
 class Room3x5(GoalRewardRoom3x5):
@@ -29,7 +27,7 @@ class Room3x5(GoalRewardRoom3x5):
 
     def __init__(self, scale: float, goal: Tuple[float, float], waypoints=None) -> None:
         super().__init__(scale)
-        self.goals = [MazeGoal(np.array(goal) * scale, threshold=0.6)]
+        self.goals = [MazeGoal(np.array(goal) * scale)]
 
     def reward(self, obs: np.ndarray) -> float:
         reward = -self.goals[0].euc_dist(obs) / self.scale
@@ -41,7 +39,7 @@ class Room3x5(GoalRewardRoom3x5):
 class Room3x5WayPoint(Room3x5):
     def __init__(self, scale: float, goal: Tuple[float, float], waypoints=None) -> None:
         super().__init__(scale, goal, waypoints)
-        self.goals = [MazeGoal(np.array(goal) * scale, threshold=0.6)]
+        self.goals = [MazeGoal(np.array(goal) * scale)]
         self.waypoints = []
         for waypoint in waypoints:
             self.waypoints.append(
@@ -93,7 +91,7 @@ class Room3x10(GoalRewardRoom3x10):
 
     def __init__(self, scale: float, goal: Tuple[float, float], waypoints=None) -> None:
         super().__init__(scale)
-        self.goals = [MazeGoal(np.array(goal) * scale, threshold=0.6)]
+        self.goals = [MazeGoal(np.array(goal) * scale)]
 
     def reward(self, obs: np.ndarray) -> float:
         reward = -self.goals[0].euc_dist(obs) / self.scale
@@ -108,7 +106,7 @@ class LargeUMaze(GoalRewardLargeUMaze):
 
     def __init__(self, scale: float, goal: Tuple[float, float], waypoints=None) -> None:
         super().__init__(scale)
-        self.goals = [MazeGoal(np.array(goal) * scale, threshold=0.6)]
+        self.goals = [MazeGoal(np.array(goal) * scale)]
 
     def reward(self, obs: np.ndarray) -> float:
         reward = -self.goals[0].euc_dist(obs) / self.scale
@@ -133,11 +131,13 @@ class ExpertTaskRegistry:
         "DistLargeUMaze_4Goals": [(2, 1), (2, 2), (2, 3), (0, 4)],
     }
     REWARD_THRESHOLDS = {
-        "DistRoom3x5_1Goals": DistReward([-70], [-70], None),
-        "DistRoom3x5WayPoint_3Goals": DistReward([-20, -40, 70], [-20, -40, -70], None),
-        "DistRoom3x10_1Goals": DistReward([-70], [-690], None),
-        "DistLargeUMaze_2Goals": DistReward([-300, -700], [-50, -100], None),
-        "DistLargeUMaze_4Goals": DistReward(
+        "DistRoom3x5_1Goals": RewardThresholdList([-70], [-70], None),
+        "DistRoom3x5WayPoint_3Goals": RewardThresholdList(
+            [-20, -40, 70], [-20, -40, -70], None
+        ),
+        "DistRoom3x10_1Goals": RewardThresholdList([-70], [-690], None),
+        "DistLargeUMaze_2Goals": RewardThresholdList([-300, -700], [-50, -100], None),
+        "DistLargeUMaze_4Goals": RewardThresholdList(
             [-200, -400, -600, -800], [-25, -50, -75, -100], None
         ),
     }

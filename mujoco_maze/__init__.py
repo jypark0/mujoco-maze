@@ -82,7 +82,9 @@ def register(task_registry):
                 )
 
 
-def custom_register(task_registry):
+def custom_register(
+    task_registry, entry_point="mujoco_maze.maze_env:MazeEnv", prefix=""
+):
     for maze_id in task_registry.keys():
         for i, task_cls in enumerate(task_registry.tasks(maze_id)):
             point_scale = task_cls.MAZE_SIZE_SCALING.point
@@ -90,8 +92,8 @@ def custom_register(task_registry):
             if point_scale is not None and point_reward_threshold is not None:
                 # Point
                 gym.envs.register(
-                    id=f"Point{maze_id}-v{i}",
-                    entry_point="mujoco_maze.maze_env:MazeEnv",
+                    id=f"{prefix}Point{maze_id}-v{i}",
+                    entry_point=entry_point,
                     kwargs=dict(
                         model_cls=PointEnv,
                         maze_task=task_cls,
@@ -107,8 +109,8 @@ def custom_register(task_registry):
             if ant_scale is not None and ant_reward_threshold is not None:
                 # Ant
                 gym.envs.register(
-                    id=f"Ant{maze_id}-v{i}",
-                    entry_point="mujoco_maze.maze_env:MazeEnv",
+                    id=f"{prefix}Ant{maze_id}-v{i}",
+                    entry_point=entry_point,
                     kwargs=dict(
                         model_cls=AntEnv,
                         maze_task=task_cls,
@@ -124,8 +126,8 @@ def custom_register(task_registry):
             if swimmer_scale is not None and swimmer_reward_threshold is not None:
                 # Reacher
                 gym.envs.register(
-                    id=f"Reacher{maze_id}-v{i}",
-                    entry_point="mujoco_maze.maze_env:MazeEnv",
+                    id=f"{prefix}Reacher{maze_id}-v{i}",
+                    entry_point=entry_point,
                     kwargs=dict(
                         model_cls=ReacherEnv,
                         maze_task=task_cls,
@@ -137,8 +139,8 @@ def custom_register(task_registry):
                 )
                 # Swimmer
                 gym.envs.register(
-                    id=f"Swimmer{maze_id}-v{i}",
-                    entry_point="mujoco_maze.maze_env:MazeEnv",
+                    id=f"{prefix}Swimmer{maze_id}-v{i}",
+                    entry_point=entry_point,
                     kwargs=dict(
                         model_cls=SwimmerEnv,
                         maze_task=task_cls,
@@ -225,7 +227,8 @@ def expert_register(expert_task_registry):
 
 
 register(TaskRegistry)
-custom_register(CustomTaskRegistry)
+custom_register(CustomTaskRegistry, "mujoco_maze.maze_env:MazeEnv", "")
+custom_register(CustomTaskRegistry, "mujoco_maze.goal_maze_env:GoalMazeEnv", "Goal")
 expert_register(ExpertTaskRegistry)
 
 __version__ = "0.2.0"

@@ -302,8 +302,8 @@ class MazeEnv(gym.Env):
                     ] = 100
 
         # X is horizontal, y is vertical for map (camera azimuth is 90)
-        shift_x = tile_size * self._init_torso_x + (size_scaling * 0.5)
-        shift_y = tile_size * self._init_torso_y + (size_scaling * 0.5)
+        shift_x = tile_size * self._init_torso_x + (cell_size * 0.5) - 0.5
+        shift_y = tile_size * self._init_torso_y + (cell_size * 0.5) - 0.5
 
         return map_view, tile_size, (shift_x, shift_y)
 

@@ -27,30 +27,42 @@ class PointEnv(AgentModel):
         self, file_path: Optional[str] = None, viewer_setup_kwargs: dict = None
     ) -> None:
         super().__init__(file_path, 1, viewer_setup_kwargs)
-        high = np.inf * np.ones(6, dtype=np.float32)
-        high[3:] = self.VELOCITY_LIMITS * 1.2
-        high[self.ORI_IND] = np.pi
-        low = -high
-        self.observation_space = gym.spaces.Box(low, high)
+        # high = np.inf * np.ones(6, dtype=np.float32)
+        # high[3:] = self.VELOCITY_LIMITS * 1.2
+        # high[self.ORI_IND] = np.pi
+        # low = -high
+        # self.observation_space = gym.spaces.Box(low, high)
 
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, float, bool, dict]:
+        action[0] = 0.2 * action[0]
+
         qpos = self.sim.data.qpos.copy()
         qpos[2] += action[1]
-        # Clip orientation
-        if qpos[2] < -np.pi:
-            qpos[2] += np.pi * 2
-        elif np.pi < qpos[2]:
-            qpos[2] -= np.pi * 2
+
+        # # Clip orientation
+        # if qpos[2] < -np.pi:
+        #     qpos[2] += np.pi * 2
+        # elif np.pi < qpos[2]:
+        #     qpos[2] -= np.pi * 2
+
         ori = qpos[2]
-        # Compute increment in each direction
-        qpos[0] += np.cos(ori) * action[0]
-        qpos[1] += np.sin(ori) * action[0]
-        qvel = np.clip(self.sim.data.qvel, -self.VELOCITY_LIMITS, self.VELOCITY_LIMITS)
+        # Compute increment in each direction.
+        dx = np.cos(ori) * action[0]
+        dy = np.sin(ori) * action[0]
+        # Ensure that the robot is within reasonable range.
+        qpos[0] = np.clip(qpos[0] + dx, -100, 100)
+        qpos[1] = np.clip(qpos[1] + dy, -100, 100)
+        qvel = self.sim.data.qvel
+
         self.set_state(qpos, qvel)
         for _ in range(0, self.frame_skip):
             self.sim.step()
         next_obs = self._get_obs()
-        return next_obs, 0.0, False, {}
+        reward = 0.0
+        done = False
+        info = {}
+
+        return next_obs, reward, done, info
 
     def _get_obs(self):
         return np.concatenate(
@@ -67,8 +79,8 @@ class PointEnv(AgentModel):
         qvel = self.init_qvel + self.np_random.randn(self.sim.model.nv) * 0.1
 
         # For debugging
-        # qvel = self.init_qvel
-        # qpos = self.init_qpos
+        qvel = self.init_qvel
+        qpos = self.init_qpos
 
         # Set everything other than point to original position and 0 velocity.
         qpos[3:] = self.init_qpos[3:]

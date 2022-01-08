@@ -88,8 +88,6 @@ class GoalMazeEnv(MazeEnv):
         else:
             inner_next_obs, inner_reward, _, info = self.wrapped_env.step(action)
 
-        if hasattr(self._task, "current_goal"):
-            self._task.update_current_goal()
         next_obs = self._get_obs()
         inner_reward = self._inner_reward_scaling * inner_reward
         outer_reward = self._task.reward(next_obs["observation"])

@@ -164,46 +164,21 @@ class WayPointMixIn:
         For both GoalEnv and MazeEnv, call this function before calling reward()
         """
         if self.waypoint_idx != len(self.waypoints):
-            if self.current_goal.neighor(obs):
+            if self.current_goal.neighbor(obs):
                 self.waypoint_idx += 1
-                if self.waypoint_idx == len(self.waypoints)
+                if self.waypoint_idx == len(self.waypoints):
                     self.current_goal = self.goals[0]
                 else:
                     self.current_goal = self.waypoints[self.waypoint_idx]
 
     def reward(self, obs: np.ndarray) -> float:
-        waypoint_is_goal = self.waypoint_idx != len(self.waypoints)
-
-        reward = np.sum(self.rews[self.waypoint_idx + 1: ])
+        reward = np.sum(self.rews[self.waypoint_idx + 1 :])
         if self.current_goal.neighbor(obs):
-            if waypoint_is_goal:
-                reward += self.waypoint_reward
-            else:
+            if self.waypoint_idx == len(self.waypoints):
                 reward += self.goal_reward
+            else:
+                reward += self.waypoint_reward
         else:
             reward += -self.current_goal.euc_dist(obs) / self.scale
 
         return reward
-
-
-        # # If all waypoints were visited
-        # if self.waypoint_idx == len(self.waypoints):
-        #     reward = -self.current_goal.euc_dist(obs) / self.scale
-        #     if self.current_goal.neighbor(obs):
-        #         reward = self.goal_reward
-        # else:
-        #     # Add all remaining distances
-        #     reward = np.sum(self.rews[self.waypoint_idx + 1 :])
-        #
-        #     if self.current_goal.neighbor(obs):
-        #         reward += self.waypoint_reward
-        #
-        #         # Set next waypoint as goal
-        #         self.waypoint_idx += 1
-        #         if self.waypoint_idx == len(self.waypoints):
-        #             self.current_goal = self.goals[0]
-        #         else:
-        #             self.current_goal = self.waypoints[self.waypoint_idx]
-        #     else:
-        #         reward += -self.current_goal.euc_dist(obs) / self.scale
-        # return reward

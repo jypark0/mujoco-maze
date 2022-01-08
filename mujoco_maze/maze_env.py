@@ -452,6 +452,11 @@ class MazeEnv(gym.Env):
                 additional_obs.append(self.wrapped_env.get_body_com(name))
 
         obs = np.concatenate([wrapped_obs[:3]] + additional_obs + [wrapped_obs[3:]])
+
+        # Update current_goal if current_goal was reached
+        if hasattr(self._task, "current_goal"):
+            self._task.update_current_goal(obs)
+
         return np.concatenate([obs, *view, np.array([self.t * 0.001])])
 
     def reset(self) -> np.ndarray:
@@ -579,8 +584,6 @@ class MazeEnv(gym.Env):
         else:
             inner_next_obs, inner_reward, _, info = self.wrapped_env.step(action)
 
-        if hasattr(self._task, "current_goal"):
-            self._task.update_current_goal()
         next_obs = self._get_obs()
         inner_reward = self._inner_reward_scaling * inner_reward
         outer_reward = self._task.reward(next_obs)

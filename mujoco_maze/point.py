@@ -27,24 +27,22 @@ class PointEnv(AgentModel):
         self, file_path: Optional[str] = None, viewer_setup_kwargs: dict = None
     ) -> None:
         super().__init__(file_path, 1, viewer_setup_kwargs)
-        # high = np.inf * np.ones(6, dtype=np.float32)
+        high = np.inf * np.ones(6, dtype=np.float32)
         # high[3:] = self.VELOCITY_LIMITS * 1.2
-        # high[self.ORI_IND] = np.pi
-        # low = -high
-        # self.observation_space = gym.spaces.Box(low, high)
+        high[self.ORI_IND] = np.pi
+        low = -high
+        self.observation_space = gym.spaces.Box(low, high)
 
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, float, bool, dict]:
         action[0] = 0.2 * action[0]
 
         qpos = self.sim.data.qpos.copy()
         qpos[2] += action[1]
-
-        # # Clip orientation
-        # if qpos[2] < -np.pi:
-        #     qpos[2] += np.pi * 2
-        # elif np.pi < qpos[2]:
-        #     qpos[2] -= np.pi * 2
-
+        # Clip orientation
+        if qpos[2] < -np.pi:
+            qpos[2] += np.pi * 2
+        elif np.pi < qpos[2]:
+            qpos[2] -= np.pi * 2
         ori = qpos[2]
         # Compute increment in each direction.
         dx = np.cos(ori) * action[0]

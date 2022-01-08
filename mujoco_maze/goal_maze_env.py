@@ -17,7 +17,7 @@ class GoalMazeEnv(MazeEnv):
     """Make MazeEnv like GoalEnv, but with only positions for goals"""
 
     def _get_obs_space(self) -> gym.spaces.Dict:
-        shape = self._get_obs().shape
+        shape = self._get_obs()["observation"].shape
         high = np.inf * np.ones(shape, dtype=np.float32)
         low = -high
         # Set velocity limits
@@ -44,7 +44,12 @@ class GoalMazeEnv(MazeEnv):
     def _get_obs(self) -> np.ndarray:
         observation = super()._get_obs()
         achieved_goal = self.wrapped_env.get_xy()
-        desired_goal = self._task.current_goal
+
+        if hasattr(self._task, "current_goal"):
+            desired_goal = self._task.current_goal.pos
+        else:
+            # Just use first goal in self._task.goals
+            desired_goal = self._task.goals[0].pos
 
         return OrderedDict(
             [
@@ -85,13 +90,6 @@ class GoalMazeEnv(MazeEnv):
         next_obs = self._get_obs()
         inner_reward = self._inner_reward_scaling * inner_reward
         outer_reward = self._task.reward(next_obs["observation"])
-        # if hasattr(self._task, "visited"):
-        #     if self._task.visited.all():
-        #         done = self._task.termination(next_obs)
-        #     else:
-        #         done = False
-        # else:
-        #     done = self._task.termination(next_obs)
         done = self._task.termination(next_obs["observation"])
         info["position"] = self.wrapped_env.get_xy()
         return next_obs, inner_reward + outer_reward, done, info

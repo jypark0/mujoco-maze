@@ -30,7 +30,7 @@ class GoalRewardRoom3x5(MazeTask):
         self.goals = [MazeGoal(np.array([4.0, 0.0]) * scale)]
 
     def reward(self, obs: np.ndarray) -> float:
-        return 1.0 if self.termination(obs) else self.PENALTY
+        return self.goal_reward if self.termination(obs) else self.PENALTY
 
     @staticmethod
     def create_maze() -> List[List[MazeCell]]:
@@ -44,15 +44,15 @@ class GoalRewardRoom3x5(MazeTask):
         ]
 
 
-class DistRewardRoom3x5(GoalRewardRoom3x5, DistRewardMixIn):
+class DistRewardRoom3x5(DistRewardMixIn, GoalRewardRoom3x5):
     REWARD_THRESHOLD: RewardThreshold = RewardThreshold(0, 0, 0)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
-        self.goal_reward = 500
+        self.goal_reward = 0
 
 
-class WayPointRoom3x5(GoalRewardRoom3x5, WayPointMixIn):
+class WayPointRoom3x5(WayPointMixIn, GoalRewardRoom3x5):
     REWARD_THRESHOLD: RewardThreshold = RewardThreshold(0, 0, 0)
 
     def __init__(self, scale: float) -> None:
@@ -94,15 +94,15 @@ class GoalRewardRoom3x10(MazeTask):
         ]
 
 
-class DistRewardRoom3x10(GoalRewardRoom3x10, DistRewardMixIn):
+class DistRewardRoom3x10(DistRewardMixIn, GoalRewardRoom3x10):
     REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-70, -690, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
-        self.goal_reward = 500
+        self.goal_reward = 0
 
 
-class WayPointRoom3x10(GoalRewardRoom3x10, WayPointMixIn):
+class WayPointRoom3x10(WayPointMixIn, GoalRewardRoom3x10):
     REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-70, -690, None)
 
     def __init__(self, scale: float) -> None:
@@ -158,15 +158,15 @@ class GoalRewardLargeUMaze(MazeTask):
         ]
 
 
-class DistRewardLargeUMaze(GoalRewardLargeUMaze, DistRewardMixIn):
+class DistRewardLargeUMaze(DistRewardMixIn, GoalRewardLargeUMaze):
     REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-700, None, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
-        self.goal_reward = 500
+        self.goal_reward = 0
 
 
-class WayPointLargeUMaze(GoalRewardLargeUMaze, WayPointMixIn):
+class WayPointLargeUMaze(WayPointMixIn, GoalRewardLargeUMaze):
     REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-700, None, None)
     INNER_REWARD_SCALING: float = 1
 

@@ -459,8 +459,6 @@ class MazeEnv(gym.Env):
         self.wrapped_env.reset()
 
         # Reset waypoints if needed
-        # if hasattr(self._task, "visited"):
-        #     self._task.visited = np.zeros(len(self._task.waypoints), dtype=bool)
         if hasattr(self._task, "waypoint_idx"):
             self._task.waypoint_idx = 0
             self._task.current_goal = self._task.waypoints[self._task.waypoint_idx]
@@ -583,13 +581,6 @@ class MazeEnv(gym.Env):
         next_obs = self._get_obs()
         inner_reward = self._inner_reward_scaling * inner_reward
         outer_reward = self._task.reward(next_obs)
-        # if hasattr(self._task, "visited"):
-        #     if self._task.visited.all():
-        #         done = self._task.termination(next_obs)
-        #     else:
-        #         done = False
-        # else:
-        #     done = self._task.termination(next_obs)
         done = self._task.termination(next_obs)
         info["position"] = self.wrapped_env.get_xy()
         return next_obs, inner_reward + outer_reward, done, info

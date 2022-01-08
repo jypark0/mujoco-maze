@@ -85,6 +85,7 @@ class MazeTask(ABC):
     def __init__(self, scale: float) -> None:
         self.goals = []
         self.scale = scale
+        self.goal_reward = 1.0
 
     def sample_goals(self) -> bool:
         return False
@@ -152,7 +153,7 @@ class WayPointMixIn:
         self.rews /= self.scale
 
     def termination(self, obs: np.ndarray) -> bool:
-        if self.goals[0].neighbor(obs):
+        if self.waypoint_idx == len(self.waypoints) and self.goals[0].neighbor(obs):
             return True
         return False
 

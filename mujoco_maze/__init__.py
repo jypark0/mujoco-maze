@@ -6,7 +6,7 @@ A maze environment using mujoco that supports custom tasks and robots.
 """
 
 
-import gym
+from gym.envs import register
 
 from mujoco_maze.ant import AntEnv
 from mujoco_maze.maze_task import TaskRegistry
@@ -16,14 +16,16 @@ from mujoco_maze.point import PointEnv
 from mujoco_maze.reacher import ReacherEnv
 from mujoco_maze.swimmer import SwimmerEnv
 
+from mujoco_maze.point_fixed_start import PointFixedStartEnv
 
-def register(task_registry):
+
+def orig_register(task_registry):
     for maze_id in task_registry.keys():
         for i, task_cls in enumerate(task_registry.tasks(maze_id)):
             point_scale = task_cls.MAZE_SIZE_SCALING.point
             if point_scale is not None:
                 # Point
-                gym.envs.register(
+                register(
                     id=f"Point{maze_id}-v{i}",
                     entry_point="mujoco_maze.maze_env:MazeEnv",
                     kwargs=dict(
@@ -39,7 +41,7 @@ def register(task_registry):
             ant_scale = task_cls.MAZE_SIZE_SCALING.ant
             if ant_scale is not None:
                 # Ant
-                gym.envs.register(
+                register(
                     id=f"Ant{maze_id}-v{i}",
                     entry_point="mujoco_maze.maze_env:MazeEnv",
                     kwargs=dict(
@@ -55,7 +57,7 @@ def register(task_registry):
             swimmer_scale = task_cls.MAZE_SIZE_SCALING.swimmer
             if swimmer_scale is not None:
                 # Reacher
-                gym.envs.register(
+                register(
                     id=f"Reacher{maze_id}-v{i}",
                     entry_point="mujoco_maze.maze_env:MazeEnv",
                     kwargs=dict(
@@ -68,7 +70,7 @@ def register(task_registry):
                     reward_threshold=task_cls.REWARD_THRESHOLD,
                 )
                 # Swimmer
-                gym.envs.register(
+                register(
                     id=f"Swimmer{maze_id}-v{i}",
                     entry_point="mujoco_maze.maze_env:MazeEnv",
                     kwargs=dict(
@@ -91,7 +93,7 @@ def custom_register(
             point_reward_threshold = task_cls.REWARD_THRESHOLD.point
             if point_scale is not None and point_reward_threshold is not None:
                 # Point
-                gym.envs.register(
+                register(
                     id=f"{prefix}Point{maze_id}-v{i}",
                     entry_point=entry_point,
                     kwargs=dict(
@@ -108,7 +110,7 @@ def custom_register(
             ant_reward_threshold = task_cls.REWARD_THRESHOLD.ant
             if ant_scale is not None and ant_reward_threshold is not None:
                 # Ant
-                gym.envs.register(
+                register(
                     id=f"{prefix}Ant{maze_id}-v{i}",
                     entry_point=entry_point,
                     kwargs=dict(
@@ -125,7 +127,7 @@ def custom_register(
             swimmer_reward_threshold = task_cls.REWARD_THRESHOLD.swimmer
             if swimmer_scale is not None and swimmer_reward_threshold is not None:
                 # Reacher
-                gym.envs.register(
+                register(
                     id=f"{prefix}Reacher{maze_id}-v{i}",
                     entry_point=entry_point,
                     kwargs=dict(
@@ -138,7 +140,7 @@ def custom_register(
                     reward_threshold=swimmer_reward_threshold,
                 )
                 # Swimmer
-                gym.envs.register(
+                register(
                     id=f"{prefix}Swimmer{maze_id}-v{i}",
                     entry_point=entry_point,
                     kwargs=dict(
@@ -165,7 +167,7 @@ def expert_register(expert_task_registry):
         for i, goal in enumerate(goals):
             if point_scale is not None and reward_thresholds.point:
                 # Point
-                gym.envs.register(
+                register(
                     id=f"Point{maze_id}_{i}-v0",
                     entry_point="mujoco_maze.maze_env:MazeEnv",
                     kwargs=dict(
@@ -181,7 +183,7 @@ def expert_register(expert_task_registry):
 
             if ant_scale is not None and reward_thresholds.ant:
                 # Ant
-                gym.envs.register(
+                register(
                     id=f"Ant{maze_id}_{i}-v0",
                     entry_point="mujoco_maze.maze_env:MazeEnv",
                     kwargs=dict(
@@ -197,7 +199,7 @@ def expert_register(expert_task_registry):
 
             if swimmer_scale is not None and reward_thresholds.swimmer:
                 # Reacher
-                gym.envs.register(
+                register(
                     id=f"Reacher{maze_id}_{i}-v0",
                     entry_point="mujoco_maze.maze_env:MazeEnv",
                     kwargs=dict(
@@ -211,7 +213,7 @@ def expert_register(expert_task_registry):
                     reward_threshold=reward_thresholds.swimmer[i],
                 )
                 # Swimmer
-                gym.envs.register(
+                register(
                     id=f"Swimmer{maze_id}_{i}-v0",
                     entry_point="mujoco_maze.maze_env:MazeEnv",
                     kwargs=dict(
@@ -226,9 +228,40 @@ def expert_register(expert_task_registry):
                 )
 
 
-register(TaskRegistry)
+orig_register(TaskRegistry)
 custom_register(CustomTaskRegistry, "mujoco_maze.maze_env:MazeEnv", "")
 custom_register(CustomTaskRegistry, "mujoco_maze.goal_maze_env:GoalMazeEnv", "Goal")
 expert_register(ExpertTaskRegistry)
+
+# Register (Goal)PointRoom3x10-FixedStart separately
+for i, task_cls in enumerate(CustomTaskRegistry.tasks("Room3x10")):
+    point_scale = task_cls.MAZE_SIZE_SCALING.point
+    point_reward_threshold = task_cls.REWARD_THRESHOLD.point
+    if point_scale is not None and point_reward_threshold is not None:
+        # Point
+        register(
+            id=f"PointRoom3x10-FixedStart-v{i}",
+            entry_point="mujoco_maze.maze_env:MazeEnv",
+            kwargs=dict(
+                model_cls=PointFixedStartEnv,
+                maze_task=task_cls,
+                maze_size_scaling=point_scale,
+                inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
+            ),
+            max_episode_steps=1000,
+            reward_threshold=point_reward_threshold,
+        )
+        register(
+            id=f"GoalPointRoom3x10-FixedStart-v{i}",
+            entry_point="mujoco_maze.goal_maze_env:GoalMazeEnv",
+            kwargs=dict(
+                model_cls=PointFixedStartEnv,
+                maze_task=task_cls,
+                maze_size_scaling=point_scale,
+                inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
+            ),
+            max_episode_steps=1000,
+            reward_threshold=point_reward_threshold,
+        )
 
 __version__ = "0.2.0"

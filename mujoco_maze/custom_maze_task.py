@@ -95,7 +95,7 @@ class GoalRewardRoom3x10(MazeTask):
 
 
 class DistRewardRoom3x10(DistRewardMixIn, GoalRewardRoom3x10):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, -40, None)
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(20, 115, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -103,7 +103,59 @@ class DistRewardRoom3x10(DistRewardMixIn, GoalRewardRoom3x10):
 
 
 class WayPointRoom3x10(WayPointMixIn, GoalRewardRoom3x10):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 1000, None)
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(20, 115, None)
+
+    def __init__(self, scale: float) -> None:
+        super().__init__(scale)
+
+        waypoints = [(2, 0), (4, 0), (6, 0), (8, 0)]
+        self.create_waypoints(waypoints)
+        self.precalculate_distances()
+
+        self.goal_reward = 1000
+        self.waypoint_reward = 0
+
+
+class GoalRewardWallRoom5x11(MazeTask):
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(0.9, 0.9, 0.9)
+    PENALTY: float = 0
+    MAZE_SIZE_SCALING: Scaling = Scaling(4.0, 4.0, 2.0)
+    INNER_REWARD_SCALING: float = 0
+    RENDER_WIDTH = 1000
+    RENDER_HEIGHT = 500
+    VIEWER_SETUP_KWARGS = {"distance": 0.6, "elevation": -60, "azimuth": 90}
+
+    def __init__(self, scale: float) -> None:
+        super().__init__(scale)
+        self.goals = [MazeGoal(np.array([9.0, 2.0]) * scale)]
+
+    def reward(self, obs: np.ndarray) -> float:
+        return 1.0 if self.termination(obs) else self.PENALTY
+
+    @staticmethod
+    def create_maze() -> List[List[MazeCell]]:
+        E, B, R = MazeCell.EMPTY, MazeCell.BLOCK, MazeCell.ROBOT
+        return [
+            [B, B, B, B, B, B, B, B, B, B, B, B, B],
+            [B, R, E, E, E, E, E, E, E, E, E, E, B],
+            [B, E, E, E, E, E, B, E, E, E, E, E, B],
+            [B, E, E, E, E, E, B, E, E, E, E, E, B],
+            [B, E, E, E, E, E, B, E, E, E, E, E, B],
+            [B, E, E, E, E, E, B, E, E, E, E, E, B],
+            [B, B, B, B, B, B, B, B, B, B, B, B, B],
+        ]
+
+
+class DistRewardWallRoom3x10(DistRewardMixIn, GoalRewardRoom3x10):
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(20, 115, None)
+
+    def __init__(self, scale: float) -> None:
+        super().__init__(scale)
+        self.goal_reward = 1000
+
+
+class WayPointRoom3x10(WayPointMixIn, GoalRewardRoom3x10):
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(20, 115, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -159,7 +211,7 @@ class GoalRewardLargeUMaze(MazeTask):
 
 
 class DistRewardLargeUMaze(DistRewardMixIn, GoalRewardLargeUMaze):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 1000, None)
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(100, 1000, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -167,7 +219,7 @@ class DistRewardLargeUMaze(DistRewardMixIn, GoalRewardLargeUMaze):
 
 
 class WayPointLargeUMaze(WayPointMixIn, GoalRewardLargeUMaze):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 1000, None)
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(100, 1000, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)

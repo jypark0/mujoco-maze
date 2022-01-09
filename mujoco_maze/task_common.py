@@ -108,7 +108,7 @@ class MazeTask(ABC):
 
 class DistRewardMixIn:
     REWARD_THRESHOLD: RewardThreshold = RewardThreshold(0, 0, 0)
-    INNER_REWARD_SCALING: float = 1
+    INNER_REWARD_SCALING: float = 0.1  # or 1
     PENALTY: float = 0
     goals: List[MazeGoal]
     scale: float
@@ -123,7 +123,7 @@ class DistRewardMixIn:
 
 class WayPointMixIn:
     REWARD_THRESHOLD: RewardThreshold = RewardThreshold(0, 0, 0)
-    INNER_REWARD_SCALING: float = 1
+    INNER_REWARD_SCALING: float = 0.1  # or 1
     PENALTY: float = 0
 
     def create_waypoints(self, waypoints=[]):

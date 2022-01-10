@@ -264,14 +264,9 @@ class MazeEnv(gym.Env):
                 ymin <= self.init_position[1] <= ymax
             ):
                 raise ValueError(f"{self.init_position} is not within limits")
-<<<<<<< HEAD
-            if not self._valid_xy(init_position):
-                raise ValueError(f"{self.init_position} is blocked")
-=======
             # # Doesn't work for now (_valid_xy isn't correct)
             # if not self._valid_xy(init_position):
             #     raise ValueError(f"{self.init_position} is blocked")
->>>>>>> 0412d42 (WIP check that init_position is not in wall)
 
         # Added to enable video_recording
         self.metadata = {
@@ -469,10 +464,7 @@ class MazeEnv(gym.Env):
 
     def _valid_xy(self, xy):
         row, col = self._xy_to_rowcol(*xy)
-<<<<<<< HEAD
-=======
         row, col = int(row), int(col)
->>>>>>> 0412d42 (WIP check that init_position is not in wall)
         ret = True
         if self._maze_structure[row][col].is_block():
             ret = False
@@ -503,15 +495,6 @@ class MazeEnv(gym.Env):
 
         # Samples random start position
         elif self.random_start:
-<<<<<<< HEAD
-            xmin, xmax, ymin, ymax = self._xy_limits()
-            valid = False
-
-            while not valid:
-                xy = self.np_random.uniform([xmin, ymin], [xmax, ymax], 2)
-                # Check that xy is not a block
-                valid = self._valid_xy(xy)
-=======
             # Get row,col limits
             rmin, cmin, rmax, cmax = 100, 100, -100, -100
             structure = self._maze_structure
@@ -537,8 +520,6 @@ class MazeEnv(gym.Env):
             # Randomly sample anywhere within that cell
             # Because of collision radius, point has a chance to get stuck near the walls (can't get out)
             xy = np.random.uniform([xmin, ymin], [xmax, ymax], 2)
->>>>>>> 0412d42 (WIP check that init_position is not in wall)
-
             self.wrapped_env.set_xy(xy)
 
         return self._get_obs()

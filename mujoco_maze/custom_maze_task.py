@@ -121,13 +121,13 @@ class GoalRewardWallRoom5x11(MazeTask):
     PENALTY: float = 0
     MAZE_SIZE_SCALING: Scaling = Scaling(4.0, 4.0, 2.0)
     INNER_REWARD_SCALING: float = 0
-    RENDER_WIDTH = 1000
+    RENDER_WIDTH = 1100
     RENDER_HEIGHT = 500
-    VIEWER_SETUP_KWARGS = {"distance": 0.6, "elevation": -60, "azimuth": 90}
+    VIEWER_SETUP_KWARGS = {"distance": 0.7, "elevation": -60, "azimuth": 90}
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
-        self.goals = [MazeGoal(np.array([9.0, 2.0]) * scale)]
+        self.goals = [MazeGoal(np.array([10.0, 0.0]) * scale)]
 
     def reward(self, obs: np.ndarray) -> float:
         return 1.0 if self.termination(obs) else self.PENALTY
@@ -137,16 +137,16 @@ class GoalRewardWallRoom5x11(MazeTask):
         E, B, R = MazeCell.EMPTY, MazeCell.BLOCK, MazeCell.ROBOT
         return [
             [B, B, B, B, B, B, B, B, B, B, B, B, B],
+            [B, E, E, E, E, E, B, E, E, E, E, E, B],
+            [B, E, E, E, E, E, B, E, E, E, E, E, B],
             [B, R, E, E, E, E, E, E, E, E, E, E, B],
-            [B, E, E, E, E, E, B, E, E, E, E, E, B],
-            [B, E, E, E, E, E, B, E, E, E, E, E, B],
             [B, E, E, E, E, E, B, E, E, E, E, E, B],
             [B, E, E, E, E, E, B, E, E, E, E, E, B],
             [B, B, B, B, B, B, B, B, B, B, B, B, B],
         ]
 
 
-class DistRewardWallRoom3x10(DistRewardMixIn, GoalRewardRoom3x10):
+class DistRewardWallRoom5x11(DistRewardMixIn, GoalRewardWallRoom5x11):
     REWARD_THRESHOLD: RewardThreshold = RewardThreshold(20, 115, None)
 
     def __init__(self, scale: float) -> None:
@@ -154,7 +154,7 @@ class DistRewardWallRoom3x10(DistRewardMixIn, GoalRewardRoom3x10):
         self.goal_reward = 1000
 
 
-class WayPointRoom3x10(WayPointMixIn, GoalRewardRoom3x10):
+class WayPointWallRoom5x11(WayPointMixIn, GoalRewardWallRoom5x11):
     REWARD_THRESHOLD: RewardThreshold = RewardThreshold(20, 115, None)
 
     def __init__(self, scale: float) -> None:
@@ -236,6 +236,11 @@ class CustomTaskRegistry:
     REGISTRY: Dict[str, List[Type[MazeTask]]] = {
         "Room3x5": [GoalRewardRoom3x5, DistRewardRoom3x5, WayPointRoom3x5],
         "Room3x10": [GoalRewardRoom3x10, DistRewardRoom3x10, WayPointRoom3x10],
+        "WallRoom5x11": [
+            GoalRewardWallRoom5x11,
+            DistRewardWallRoom5x11,
+            WayPointWallRoom5x11,
+        ],
         "LargeUMaze": [GoalRewardLargeUMaze, DistRewardLargeUMaze, WayPointLargeUMaze],
     }
 

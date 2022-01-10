@@ -264,6 +264,8 @@ class MazeEnv(gym.Env):
                 ymin <= self.init_position[1] <= ymax
             ):
                 raise ValueError(f"{self.init_position} is not within limits")
+            if not self._valid_xy(init_position):
+                raise ValueError(f"{self.init_position} is blocked")
 
         # Added to enable video_recording
         self.metadata = {
@@ -459,6 +461,14 @@ class MazeEnv(gym.Env):
 
         return np.concatenate([obs, *view, np.array([self.t * 0.001])])
 
+    def _valid_xy(self, xy):
+        row, col = self._xy_to_rowcol(*xy)
+        ret = True
+        if self._maze_structure[row][col].is_block():
+            ret = False
+
+        return ret
+
     def reset(self) -> np.ndarray:
         self.t = 0
         self.wrapped_env.reset()
@@ -484,7 +494,13 @@ class MazeEnv(gym.Env):
         # Samples random start position
         elif self.random_start:
             xmin, xmax, ymin, ymax = self._xy_limits()
-            xy = self.np_random.uniform([xmin, ymin], [xmax, ymax], 2)
+            valid = False
+
+            while not valid:
+                xy = self.np_random.uniform([xmin, ymin], [xmax, ymax], 2)
+                # Check that xy is not a block
+                valid = self._valid_xy(xy)
+
             self.wrapped_env.set_xy(xy)
 
         return self._get_obs()

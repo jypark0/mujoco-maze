@@ -233,35 +233,36 @@ custom_register(CustomTaskRegistry, "mujoco_maze.maze_env:MazeEnv", "")
 custom_register(CustomTaskRegistry, "mujoco_maze.goal_maze_env:GoalMazeEnv", "Goal")
 expert_register(ExpertTaskRegistry)
 
-# Register (Goal)PointRoom3x10-FixedStart separately
-for i, task_cls in enumerate(CustomTaskRegistry.tasks("Room3x10")):
-    point_scale = task_cls.MAZE_SIZE_SCALING.point
-    point_reward_threshold = task_cls.REWARD_THRESHOLD.point
-    if point_scale is not None and point_reward_threshold is not None:
-        # Point
-        register(
-            id=f"PointRoom3x10-FixedStart-v{i}",
-            entry_point="mujoco_maze.maze_env:MazeEnv",
-            kwargs=dict(
-                model_cls=PointFixedStartEnv,
-                maze_task=task_cls,
-                maze_size_scaling=point_scale,
-                inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
-            ),
-            max_episode_steps=1000,
-            reward_threshold=point_reward_threshold,
-        )
-        register(
-            id=f"GoalPointRoom3x10-FixedStart-v{i}",
-            entry_point="mujoco_maze.goal_maze_env:GoalMazeEnv",
-            kwargs=dict(
-                model_cls=PointFixedStartEnv,
-                maze_task=task_cls,
-                maze_size_scaling=point_scale,
-                inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
-            ),
-            max_episode_steps=1000,
-            reward_threshold=point_reward_threshold,
-        )
+# Register FixedStart envs separately
+for maze_id in ["Room3x10", "WallRoom5x11"]:
+    for i, task_cls in enumerate(CustomTaskRegistry.tasks(maze_id)):
+        point_scale = task_cls.MAZE_SIZE_SCALING.point
+        point_reward_threshold = task_cls.REWARD_THRESHOLD.point
+        if point_scale is not None and point_reward_threshold is not None:
+            # Point
+            register(
+                id=f"Point{maze_id}-FixedStart-v{i}",
+                entry_point="mujoco_maze.maze_env:MazeEnv",
+                kwargs=dict(
+                    model_cls=PointFixedStartEnv,
+                    maze_task=task_cls,
+                    maze_size_scaling=point_scale,
+                    inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
+                ),
+                max_episode_steps=1000,
+                reward_threshold=point_reward_threshold,
+            )
+            register(
+                id=f"GoalPoint{maze_id}-FixedStart-v{i}",
+                entry_point="mujoco_maze.goal_maze_env:GoalMazeEnv",
+                kwargs=dict(
+                    model_cls=PointFixedStartEnv,
+                    maze_task=task_cls,
+                    maze_size_scaling=point_scale,
+                    inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
+                ),
+                max_episode_steps=1000,
+                reward_threshold=point_reward_threshold,
+            )
 
 __version__ = "0.2.0"

@@ -31,4 +31,5 @@
     <motor ctrllimited="true" ctrlrange="-1 1" joint="ballx"/>
     <motor ctrllimited="true" ctrlrange="-0.25 0.25" joint="rot"/>
   </actuator>
+  <size nconmax="8000"/>
 </mujoco>

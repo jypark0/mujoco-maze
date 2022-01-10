@@ -489,10 +489,9 @@ class MazeEnv(gym.Env):
             xy = self.np_random.choice(self._init_positions)
             self.wrapped_env.set_xy(xy)
 
-        # Set initial position if given
+        # If init_position is specified
         if self.init_position is not None:
-            self.wrapped_env.set_xy(np.asarray(self.init_position))
-
+            self.init_pos = self.init_position
         # Samples random start position
         elif self.random_start:
             # Get row,col limits
@@ -520,8 +519,13 @@ class MazeEnv(gym.Env):
             # Randomly sample anywhere within that cell
             # Because of collision radius, point has a chance to get stuck near the walls (can't get out)
             xy = np.random.uniform([xmin, ymin], [xmax, ymax], 2)
-            self.init_position = xy
-            self.wrapped_env.set_xy(xy)
+            self.init_pos = xy
+        else:
+            # Store init_pos (for chasm: resetting to init pos)
+            self.init_pos = self.wrapped_env.get_xy()
+
+        # Set pos to self.init_position
+        self.wrapped_env.set_xy(np.asarray(self.init_pos))
 
         return self._get_obs()
 
@@ -623,15 +627,14 @@ class MazeEnv(gym.Env):
             if falls is not None:
                 # Reset to this episodes initial position
                 # Must also reset_model to reset velocities and orientation
-                new_pos = self.init_position
+                new_pos = self.init_pos
+                print(f"Return to init_pos: {new_pos}")
                 self.wrapped_env.reset_model()
                 self.wrapped_env.set_xy(new_pos)
 
         else:
             inner_next_obs, inner_reward, _, info = self.wrapped_env.step(action)
 
-        if falls is not None:
-            breakpoint()
         next_obs = self._get_obs()
 
         inner_reward = self._inner_reward_scaling * inner_reward

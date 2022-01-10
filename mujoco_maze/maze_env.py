@@ -264,8 +264,9 @@ class MazeEnv(gym.Env):
                 ymin <= self.init_position[1] <= ymax
             ):
                 raise ValueError(f"{self.init_position} is not within limits")
-            if not self._valid_xy(init_position):
-                raise ValueError(f"{self.init_position} is blocked")
+            # # Doesn't work for now (_valid_xy isn't correct)
+            # if not self._valid_xy(init_position):
+            #     raise ValueError(f"{self.init_position} is blocked")
 
         # Added to enable video_recording
         self.metadata = {
@@ -463,6 +464,7 @@ class MazeEnv(gym.Env):
 
     def _valid_xy(self, xy):
         row, col = self._xy_to_rowcol(*xy)
+        row, col = int(row), int(col)
         ret = True
         if self._maze_structure[row][col].is_block():
             ret = False
@@ -493,13 +495,31 @@ class MazeEnv(gym.Env):
 
         # Samples random start position
         elif self.random_start:
-            xmin, xmax, ymin, ymax = self._xy_limits()
-            valid = False
+            # Get row,col limits
+            rmin, cmin, rmax, cmax = 100, 100, -100, -100
+            structure = self._maze_structure
+            for i, j in it.product(range(len(structure)), range(len(structure[0]))):
+                if structure[i][j].is_block():
+                    continue
+                rmin, rmax = min(rmin, i), max(rmax, i)
+                cmin, cmax = min(cmin, j), max(cmax, j)
 
+            # Sample random row and col
+            valid = False
             while not valid:
-                xy = self.np_random.uniform([xmin, ymin], [xmax, ymax], 2)
-                # Check that xy is not a block
-                valid = self._valid_xy(xy)
+                # Check that rc is not a block
+                r, c = self.np_random.randint([rmin, cmin], [rmax + 1, cmax + 1], 2)
+                valid = not (structure[r][c].is_block() or structure[r][c].is_chasm())
+
+            # Transform r,c into random xy within size_scaling / 2
+            x0, y0 = self._init_torso_x, self._init_torso_y
+            scaling = self._maze_size_scaling
+            xmin, xmax = (c - 0.5) * scaling - x0, (c + 0.5) * scaling - x0
+            ymin, ymax = (r - 0.5) * scaling - y0, (r + 0.5) * scaling - y0
+
+            # Randomly sample anywhere within that cell
+            # Because of collision radius, point has a chance to get stuck near the walls (can't get out)
+            xy = np.random.uniform([xmin, ymin], [xmax, ymax], 2)
 
             self.wrapped_env.set_xy(xy)
 

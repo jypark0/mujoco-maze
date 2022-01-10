@@ -157,7 +157,8 @@ class CollisionDetector:
         radius: float,
     ) -> None:
         h, w = len(structure), len(structure[0])
-        self.lines = []
+        self.wall_lines = []
+        self.chasm_lines = []
 
         def is_empty(i, j) -> bool:
             if 0 <= i < h and 0 <= j < w:
@@ -165,6 +166,7 @@ class CollisionDetector:
             else:
                 return False
 
+        # Collision detection for walls
         for i, j in it.product(range(len(structure)), range(len(structure[0]))):
             if not structure[i][j].is_block():
                 continue
@@ -176,21 +178,50 @@ class CollisionDetector:
             for dx, dy in self.NEIGHBORS:
                 if not is_empty(i + dy, j + dx):
                     continue
-                self.lines.append(
+                self.wall_lines.append(
                     Line(
                         (max_x if dx == 1 else min_x, max_y if dy == 1 else min_y),
                         (min_x if dx == -1 else max_x, min_y if dy == -1 else max_y),
                     )
                 )
 
-    def detect(self, old_pos: np.ndarray, new_pos: np.ndarray) -> Optional[Collision]:
+        # Collision detection for chasm
+        for i, j in it.product(range(len(structure)), range(len(structure[0]))):
+            if not structure[i][j].is_chasm():
+                continue
+            y_base = i * size_scaling - torso_y
+            x_base = j * size_scaling - torso_x
+            # Don't use radius for chasm
+            offset = size_scaling * 0.5
+            min_y, max_y = y_base - offset, y_base + offset
+            min_x, max_x = x_base - offset, x_base + offset
+            for dx, dy in self.NEIGHBORS:
+                if not is_empty(i + dy, j + dx):
+                    continue
+                self.chasm_lines.append(
+                    Line(
+                        (max_x if dx == 1 else min_x, max_y if dy == 1 else min_y),
+                        (min_x if dx == -1 else max_x, min_y if dy == -1 else max_y),
+                    )
+                )
+
+    def detect(
+        self, old_pos: np.ndarray, new_pos: np.ndarray, cell_type="walls"
+    ) -> Optional[Collision]:
         move = Line(old_pos, new_pos)
         # First, checks that it actually moved
         if move.norm <= 1e-8:
             return None
         # Next, checks that the trajectory cross the wall or not
         collisions = []
-        for line in self.lines:
+        if cell_type == "walls":
+            lines = self.wall_lines
+        elif cell_type == "chasm":
+            lines = self.chasm_lines
+        else:
+            raise NotImplementedError
+
+        for line in lines:
             intersection = line.intersect(move)
             if intersection is not None:
                 reflection = line.reflection(move.p2)

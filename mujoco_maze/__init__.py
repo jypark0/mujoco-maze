@@ -234,7 +234,7 @@ custom_register(CustomTaskRegistry, "mujoco_maze.goal_maze_env:GoalMazeEnv", "Go
 expert_register(ExpertTaskRegistry)
 
 # Register FixedStart envs separately
-for maze_id in ["Room3x10", "WallRoom5x11"]:
+for maze_id in ["Room3x10", "WallRoom5x11", "ChasmRoom5x11"]:
     for i, task_cls in enumerate(CustomTaskRegistry.tasks(maze_id)):
         point_scale = task_cls.MAZE_SIZE_SCALING.point
         point_reward_threshold = task_cls.REWARD_THRESHOLD.point

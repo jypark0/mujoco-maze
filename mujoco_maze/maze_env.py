@@ -474,6 +474,8 @@ class MazeEnv(gym.Env):
     def reset(self) -> np.ndarray:
         self.t = 0
         self.wrapped_env.reset()
+        # Store initial position (for chasm: resetting to init pos)
+        self.init_position = self.wrapped_env.get_xy()
 
         # Reset waypoints if needed
         if hasattr(self._task, "waypoint_idx"):
@@ -630,8 +632,6 @@ class MazeEnv(gym.Env):
         else:
             inner_next_obs, inner_reward, _, info = self.wrapped_env.step(action)
 
-        if falls is not None:
-            breakpoint()
         next_obs = self._get_obs()
 
         inner_reward = self._inner_reward_scaling * inner_reward

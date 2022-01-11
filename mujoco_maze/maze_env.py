@@ -209,7 +209,13 @@ class MazeEnv(gym.Env):
 
         # Set goals
         for i, goal in enumerate(self._task.goals):
-            z = goal.pos[2] if goal.dim >= 3 else 0.0
+            if goal.dim >= 3:
+                z = goal.pos[2]
+            elif self.elevated:
+                z = maze_height * maze_size_scaling
+            else:
+                z = 0.0
+
             if goal.custom_size is None:
                 size = f"{maze_size_scaling * 0.15}"
             else:
@@ -226,7 +232,12 @@ class MazeEnv(gym.Env):
         # Set waypoints
         if hasattr(self._task, "waypoints"):
             for i, goal in enumerate(self._task.waypoints):
-                z = goal.pos[2] if goal.dim >= 3 else 0.0
+                if goal.dim >= 3:
+                    z = goal.pos[2]
+                elif self.elevated:
+                    z = maze_height * maze_size_scaling
+                else:
+                    z = 0.0
                 if goal.custom_size is None:
                     size = f"{maze_size_scaling * 0.1}"
                 else:

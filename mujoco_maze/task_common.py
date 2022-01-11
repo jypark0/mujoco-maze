@@ -133,7 +133,7 @@ class WayPointMixIn:
                 MazeGoal(
                     np.array(waypoint) * self.scale,
                     rgb=GREEN,
-                    custom_size=0.1 * self.scale / 2,
+                    custom_size=0.2 * self.scale / 2,
                 )
             )
 

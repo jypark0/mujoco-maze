@@ -211,7 +211,7 @@ class MazeEnv(gym.Env):
         for i, goal in enumerate(self._task.goals):
             z = goal.pos[2] if goal.dim >= 3 else 0.0
             if goal.custom_size is None:
-                size = f"{maze_size_scaling * 0.1}"
+                size = f"{maze_size_scaling * 0.15}"
             else:
                 size = f"{goal.custom_size}"
             ET.SubElement(
@@ -628,7 +628,6 @@ class MazeEnv(gym.Env):
                 # Reset to this episodes initial position
                 # Must also reset_model to reset velocities and orientation
                 new_pos = self.init_pos
-                print(f"Return to init_pos: {new_pos}")
                 self.wrapped_env.reset_model()
                 self.wrapped_env.set_xy(new_pos)
 

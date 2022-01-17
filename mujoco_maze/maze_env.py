@@ -18,6 +18,7 @@ from gym.utils import seeding
 
 from mujoco_maze import maze_env_utils, maze_task
 from mujoco_maze.agent_model import AgentModel
+from mujoco_maze.task_common import RED
 
 # Directory that contains mujoco xml files.
 MODEL_DIR = os.path.dirname(os.path.abspath(__file__)) + "/assets"
@@ -207,52 +208,32 @@ class MazeEnv(gym.Env):
             if "name" not in geom.attrib:
                 raise Exception("Every geom of the torso must have a name")
 
-        # Draw goal_region
-        if hasattr(self._task, "goal_corner"):
-            goal_corner = self._task.goal_corner
-            xmin, xmax, ymin, ymax = self._xy_limits()
+        # Set goals
+        for i, goal in enumerate(self._task.goals):
+            if goal.dim >= 3:
+                z = goal.pos[2]
+            elif self.elevated:
+                z = maze_height * maze_size_scaling
+            else:
+                z = 0.0
 
-            x_other_corner = (
-                xmin
-                if abs(goal_corner[0] - xmin) < abs(goal_corner[0] - xmax)
-                else xmax
-            )
-            y_other_corner = (
-                ymin
-                if abs(goal_corner[1] - ymin) < abs(goal_corner[1] - ymax)
-                else ymax
-            )
-
-            pos_x = (goal_corner[0] + x_other_corner) / 2
-            pos_y = (goal_corner[1] + y_other_corner) / 2
-            z = 0.0
-
-            size_x = abs(goal_corner[0] + x_other_corner) / 4
-            size_y = abs(goal_corner[1] + y_other_corner) / 4
-
-            ET.SubElement(
-                worldbody,
-                "geom",
-                name=f"goal_region",
-                pos=f"{pos_x} {pos_y} {z}",
-                type="box",
-                material="",
-                contype="1",
-                conaffinity="1",
-                size=f"{size_x} {size_y} {z}",
-                rgba="0.3 0.3 0.3 1",
-            )
-
-        else:
-            # Set point goals
-            for i, goal in enumerate(self._task.goals):
-                if goal.dim >= 3:
-                    z = goal.pos[2]
-                elif self.elevated:
-                    z = maze_height * maze_size_scaling
-                else:
-                    z = 0.0
-
+            # Goal region
+            if goal.region_size is not None:
+                h = 0.01
+                ET.SubElement(
+                    worldbody,
+                    "geom",
+                    name=f"goal_region{i}",
+                    pos=f"{goal.pos[0]} {goal.pos[1]} {z}",
+                    size=f"{goal.region_size[0]} {goal.region_size[1]} {h}",
+                    type="box",
+                    material="",
+                    contype="1",
+                    conaffinity="1",
+                    rgba=goal.rgb.rgba_str(),
+                )
+            else:
+                # Point goals
                 if goal.custom_size is None:
                     size = f"{maze_size_scaling * 0.15}"
                 else:
@@ -308,8 +289,8 @@ class MazeEnv(gym.Env):
         # Check that init_position is valid
         xmin, xmax, ymin, ymax = self._xy_limits()
         if init_position is not None:
-            if not (xmin <= self.init_position[0] <= xmax) or not (
-                ymin <= self.init_position[1] <= ymax
+            if not (xmin + 1 <= self.init_position[0] <= xmax - 1) or not (
+                ymin + 1 <= self.init_position[1] <= ymax - 1
             ):
                 raise ValueError(f"{self.init_position} is not within limits")
             # # Doesn't work for now (_valid_xy isn't correct)
@@ -550,21 +531,15 @@ class MazeEnv(gym.Env):
             self.init_pos = self.init_position
         # Samples random start position
         elif self.random_start:
-            # Get row,col limits
-            rmin, cmin, rmax, cmax = 100, 100, -100, -100
+            valid_rowcol = []
             structure = self._maze_structure
             for i, j in it.product(range(len(structure)), range(len(structure[0]))):
-                if structure[i][j].is_block():
-                    continue
-                rmin, rmax = min(rmin, i), max(rmax, i)
-                cmin, cmax = min(cmin, j), max(cmax, j)
+                if not structure[i][j].is_wall_or_chasm():
+                    valid_rowcol.append((i, j))
 
             # Sample random row and col
-            valid = False
-            while not valid:
-                # Check that rc is not a block
-                r, c = self.np_random.randint([rmin, cmin], [rmax + 1, cmax + 1], 2)
-                valid = not (structure[r][c].is_block() or structure[r][c].is_chasm())
+            idx = self.np_random.randint(0, len(valid_rowcol))
+            r, c = valid_rowcol[idx]
 
             # Transform r,c into random xy within size_scaling / 2
             x0, y0 = self._init_torso_x, self._init_torso_y
@@ -572,9 +547,68 @@ class MazeEnv(gym.Env):
             xmin, xmax = (c - 0.5) * scaling - x0, (c + 0.5) * scaling - x0
             ymin, ymax = (r - 0.5) * scaling - y0, (r + 0.5) * scaling - y0
 
-            # Randomly sample anywhere within that cell
             # Because of collision radius, point has a chance to get stuck near the walls (can't get out)
+            # Add 1 distance if next cell is wall or chasm
+            x_change = False
+            y_change = False
+            # bottom
+            if r > 0 and structure[r - 1][c].is_wall_or_chasm():
+                ymin += 1
+                y_change = True
+            # top
+            if r < len(structure) - 1 and structure[r + 1][c].is_wall_or_chasm():
+                ymax -= 1
+                y_change = True
+            # left
+            if c > 0 and structure[r][c - 1].is_wall_or_chasm():
+                xmin += 1
+                x_change = True
+            # right
+            if c < len(structure[0]) - 1 and structure[r][c + 1].is_wall_or_chasm():
+                xmax -= 1
+                x_change = True
+
+            # # Also check corners
+            # # bottom left corner
+            # if r > 0 and c > 0 and structure[r - 1][c - 1].is_wall_or_chasm():
+            #     if not y_change:
+            #         ymin += 1
+            #     if not x_change:
+            #         xmin += 1
+            # # bottom right corner
+            # if (
+            #     r > 0
+            #     and c < len(structure[0]) - 1
+            #     and structure[r - 1][c + 1].is_wall_or_chasm()
+            # ):
+            #     if not y_change:
+            #         ymin += 1
+            #     if not x_change:
+            #         xmax -= 1
+            # # top left corner
+            # if (
+            #     r < len(structure[0]) - 1
+            #     and c > 0
+            #     and structure[r + 1][c - 1].is_wall_or_chasm()
+            # ):
+            #     if not y_change:
+            #         ymax -= 1
+            #     if not x_change:
+            #         xmin += 1
+            # # bottom right corner
+            # if (
+            #     r < len(structure[0]) - 1
+            #     and c < len(structure[0]) - 1
+            #     and structure[r + 1][c + 1].is_wall_or_chasm()
+            # ):
+            #     if not y_change:
+            #         ymax -= 1
+            #     if not x_change:
+            #         xmax -= 1
+            #
+            # Randomly sample anywhere within that cell
             xy = np.random.uniform([xmin, ymin], [xmax, ymax], 2)
+
             self.init_pos = xy
         else:
             # Store init_pos (for chasm: resetting to init pos)

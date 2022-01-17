@@ -30,6 +30,7 @@ class MazeGoal:
         rgb: Rgb = RED,
         threshold: float = 0.6,
         custom_size: Optional[float] = None,
+        region_size=None,
     ) -> None:
         self.pos = pos
         self.dim = pos.shape[0]
@@ -37,6 +38,7 @@ class MazeGoal:
         self.rgb = rgb
         self.threshold = threshold
         self.custom_size = custom_size
+        self.region_size = region_size
 
     def neighbor(self, obs: np.ndarray) -> float:
         return np.linalg.norm(obs[: self.dim] - self.pos) <= self.threshold

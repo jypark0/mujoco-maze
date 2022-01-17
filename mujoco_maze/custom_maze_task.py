@@ -216,8 +216,18 @@ class GoalRewardWallRoom7x15(MazeTask):
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
-        self.goals = [MazeGoal(np.array([14.0, 0.0]) * scale)]
+        self.goals = [
+            MazeGoal(
+                np.array([14.25, 1.75]) * scale,
+                region_size=(scale / 4, 1.75 * scale),
+            )
+        ]
         self.goal_reward = 10
+
+    def termination(self, obs: np.ndarray) -> bool:
+        if obs[0] >= 14 * self.scale and obs[1] >= 0.0 * self.scale:
+            return True
+        return False
 
     def reward(self, obs: np.ndarray) -> float:
         return self.goal_reward if self.termination(obs) else self.PENALTY
@@ -288,10 +298,13 @@ class GoalRewardLargeUMaze(MazeTask):
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
-        self.goals = [MazeGoal(np.array([0.0, 4.0 * scale]))]
+        self.goals = [
+            MazeGoal(
+                np.array([-0.25, 4.25]) * scale,
+                region_size=(scale / 4, scale / 4),
+            )
+        ]
         self.goal_reward = 10
-
-        self.goal_corner = (0.0, 4.0 * scale)
 
     def termination(self, obs: np.ndarray) -> bool:
         if obs[0] <= 0 and obs[1] >= 4.0 * self.scale:

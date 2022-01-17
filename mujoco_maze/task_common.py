@@ -28,10 +28,9 @@ class MazeGoal:
         pos: np.ndarray,
         reward_scale: float = 1.0,
         rgb: Rgb = RED,
-        threshold: float = 0.5,
+        threshold: float = 0.6,
         custom_size: Optional[float] = None,
     ) -> None:
-        assert 0.0 <= reward_scale <= 1.0
         self.pos = pos
         self.dim = pos.shape[0]
         self.reward_scale = reward_scale

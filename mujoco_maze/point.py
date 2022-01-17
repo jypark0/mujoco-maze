@@ -34,10 +34,9 @@ class PointEnv(AgentModel):
         self.observation_space = gym.spaces.Box(low, high)
 
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, float, bool, dict]:
-        action[0] = 0.2 * action[0]
-
         qpos = self.sim.data.qpos.copy()
-        qpos[2] += action[1]
+        # ctrlrange=[-1, 1], scale to [-0.25, 0.25] here
+        qpos[2] += 0.25 * action[1]
         # Clip orientation
         if qpos[2] < -np.pi:
             qpos[2] += np.pi * 2
@@ -45,8 +44,8 @@ class PointEnv(AgentModel):
             qpos[2] -= np.pi * 2
         ori = qpos[2]
         # Compute increment in each direction.
-        dx = np.cos(ori) * action[0]
-        dy = np.sin(ori) * action[0]
+        dx = np.cos(ori) * 0.2 * action[0]
+        dy = np.sin(ori) * 0.2 * action[0]
         # Ensure that the robot is within reasonable range.
         qpos[0] = np.clip(qpos[0] + dx, -100, 100)
         qpos[1] = np.clip(qpos[1] + dy, -100, 100)

@@ -28,6 +28,7 @@ class GoalRewardRoom3x5(MazeTask):
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
         self.goals = [MazeGoal(np.array([4.0, 0.0]) * scale)]
+        self.goal_reward = 10
 
     def reward(self, obs: np.ndarray) -> float:
         return self.goal_reward if self.termination(obs) else self.PENALTY
@@ -78,9 +79,10 @@ class GoalRewardRoom3x10(MazeTask):
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
         self.goals = [MazeGoal(np.array([9.0, 0.0]) * scale)]
+        self.goal_reward = 10
 
     def reward(self, obs: np.ndarray) -> float:
-        return 1.0 if self.termination(obs) else self.PENALTY
+        return self.goal_reward if self.termination(obs) else self.PENALTY
 
     @staticmethod
     def create_maze() -> List[List[MazeCell]]:
@@ -112,7 +114,6 @@ class WayPointRoom3x10(WayPointMixIn, GoalRewardRoom3x10):
         self.create_waypoints(waypoints)
         self.precalculate_distances()
 
-        self.goal_reward = 1000
         self.waypoint_reward = 0
 
 
@@ -128,9 +129,10 @@ class GoalRewardWallRoom5x11(MazeTask):
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
         self.goals = [MazeGoal(np.array([10.0, 0.0]) * scale)]
+        self.goal_reward = 10
 
     def reward(self, obs: np.ndarray) -> float:
-        return 1.0 if self.termination(obs) else self.PENALTY
+        return self.goal_reward if self.termination(obs) else self.PENALTY
 
     @staticmethod
     def create_maze() -> List[List[MazeCell]]:
@@ -183,6 +185,25 @@ class GoalRewardChasmRoom5x11(GoalRewardWallRoom5x11):
         ]
 
 
+class DistRewardChasmRoom5x11(DistRewardMixIn, GoalRewardChasmRoom5x11):
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(20, 115, None)
+
+    pass
+
+
+class WayPointChasmRoom5x11(WayPointMixIn, GoalRewardChasmRoom5x11):
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(20, 115, None)
+
+    def __init__(self, scale: float) -> None:
+        super().__init__(scale)
+
+        waypoints = [(2, 0), (4, 0), (6, 0), (8, 0)]
+        self.create_waypoints(waypoints)
+        self.precalculate_distances()
+
+        self.waypoint_reward = 0
+
+
 class GoalRewardWallRoom7x15(MazeTask):
     REWARD_THRESHOLD: RewardThreshold = RewardThreshold(0.9, 0.9, 0.9)
     PENALTY: float = 0
@@ -196,9 +217,10 @@ class GoalRewardWallRoom7x15(MazeTask):
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
         self.goals = [MazeGoal(np.array([14.0, 0.0]) * scale)]
+        self.goal_reward = 10
 
     def reward(self, obs: np.ndarray) -> float:
-        return 1.0 if self.termination(obs) else self.PENALTY
+        return self.goal_reward if self.termination(obs) else self.PENALTY
 
     @staticmethod
     def create_maze() -> List[List[MazeCell]]:
@@ -267,9 +289,17 @@ class GoalRewardLargeUMaze(MazeTask):
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
         self.goals = [MazeGoal(np.array([0.0, 4.0 * scale]))]
+        self.goal_reward = 10
+
+        self.goal_corner = (0.0, 4.0 * scale)
+
+    def termination(self, obs: np.ndarray) -> bool:
+        if obs[0] <= 0 and obs[1] >= 4.0 * self.scale:
+            return True
+        return False
 
     def reward(self, obs: np.ndarray) -> float:
-        return 1.0 if self.termination(obs) else self.PENALTY
+        return self.goal_reward if self.termination(obs) else self.PENALTY
 
     @staticmethod
     def create_maze() -> List[List[MazeCell]]:
@@ -298,7 +328,7 @@ class GoalRewardLargeUMaze(MazeTask):
 
 
 class DistRewardLargeUMaze(DistRewardMixIn, GoalRewardLargeUMaze):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(100, 1000, None)
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 1000, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -306,7 +336,7 @@ class DistRewardLargeUMaze(DistRewardMixIn, GoalRewardLargeUMaze):
 
 
 class WayPointLargeUMaze(WayPointMixIn, GoalRewardLargeUMaze):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(100, 1000, None)
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(155, 245, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -330,6 +360,8 @@ class CustomTaskRegistry:
         ],
         "ChasmRoom5x11": [
             GoalRewardChasmRoom5x11,
+            DistRewardChasmRoom5x11,
+            WayPointChasmRoom5x11,
         ],
         "WallRoom7x15": [
             GoalRewardWallRoom7x15,

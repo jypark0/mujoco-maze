@@ -207,27 +207,64 @@ class MazeEnv(gym.Env):
             if "name" not in geom.attrib:
                 raise Exception("Every geom of the torso must have a name")
 
-        # Set goals
-        for i, goal in enumerate(self._task.goals):
-            if goal.dim >= 3:
-                z = goal.pos[2]
-            elif self.elevated:
-                z = maze_height * maze_size_scaling
-            else:
-                z = 0.0
+        # Draw goal_region
+        if hasattr(self._task, "goal_corner"):
+            goal_corner = self._task.goal_corner
+            xmin, xmax, ymin, ymax = self._xy_limits()
 
-            if goal.custom_size is None:
-                size = f"{maze_size_scaling * 0.15}"
-            else:
-                size = f"{goal.custom_size}"
+            x_other_corner = (
+                xmin
+                if abs(goal_corner[0] - xmin) < abs(goal_corner[0] - xmax)
+                else xmax
+            )
+            y_other_corner = (
+                ymin
+                if abs(goal_corner[1] - ymin) < abs(goal_corner[1] - ymax)
+                else ymax
+            )
+
+            pos_x = (goal_corner[0] + x_other_corner) / 2
+            pos_y = (goal_corner[1] + y_other_corner) / 2
+            z = 0.0
+
+            size_x = abs(goal_corner[0] + x_other_corner) / 4
+            size_y = abs(goal_corner[1] + y_other_corner) / 4
+
             ET.SubElement(
                 worldbody,
-                "site",
-                name=f"goal_site{i}",
-                pos=f"{goal.pos[0]} {goal.pos[1]} {z}",
-                size=size,
-                rgba=goal.rgb.rgba_str(),
+                "geom",
+                name=f"goal_region",
+                pos=f"{pos_x} {pos_y} {z}",
+                type="box",
+                material="",
+                contype="1",
+                conaffinity="1",
+                size=f"{size_x} {size_y} {z}",
+                rgba="0.3 0.3 0.3 1",
             )
+
+        else:
+            # Set point goals
+            for i, goal in enumerate(self._task.goals):
+                if goal.dim >= 3:
+                    z = goal.pos[2]
+                elif self.elevated:
+                    z = maze_height * maze_size_scaling
+                else:
+                    z = 0.0
+
+                if goal.custom_size is None:
+                    size = f"{maze_size_scaling * 0.15}"
+                else:
+                    size = f"{goal.custom_size}"
+                ET.SubElement(
+                    worldbody,
+                    "site",
+                    name=f"goal_site{i}",
+                    pos=f"{goal.pos[0]} {goal.pos[1]} {z}",
+                    size=size,
+                    rgba=goal.rgb.rgba_str(),
+                )
 
         # Set waypoints
         if hasattr(self._task, "waypoints"):
@@ -315,9 +352,17 @@ class MazeEnv(gym.Env):
                         :,
                     ] = 100
 
+        # Need to flip map y-axis to match camera view
+        map_view = np.flip(map_view, axis=0)
+
         # X is horizontal, y is vertical for map (camera azimuth is 90)
+        # Will flip y coordinates later, account for this in shift_y
         shift_x = tile_size * self._init_torso_x + (cell_size * 0.5) - 0.5
-        shift_y = tile_size * self._init_torso_y + (cell_size * 0.5) - 0.5
+        shift_y = (
+            map_view.shape[0]
+            - (tile_size * self._init_torso_y + (cell_size * 0.5))
+            - 0.5
+        )
 
         return map_view, tile_size, (shift_x, shift_y)
 

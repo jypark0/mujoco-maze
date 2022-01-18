@@ -31,6 +31,7 @@ class MazeEnv(gym.Env):
         maze_task: Type[maze_task.MazeTask] = maze_task.MazeTask,
         random_start: bool = False,
         init_position: Optional[Tuple[float, float]] = None,
+        init_rowcol: Optional[Tuple[int, int]] = None,
         include_position: bool = True,
         maze_height: float = 0.5,
         maze_size_scaling: float = 4.0,
@@ -49,8 +50,19 @@ class MazeEnv(gym.Env):
         # Expose task as public attribute
         self.task = self._task
 
+        cond = (
+            int(random_start)
+            + int(init_position is not None)
+            + int(init_rowcol is not None)
+        )
+        if cond > 1:
+            raise ValueError(
+                "Only one of random_start, init_position, and init_rowcol should be given"
+            )
+
         self.random_start = random_start
         self.init_position = init_position
+        self.init_rowcol = init_rowcol
 
         self._maze_height = height = maze_height
         self._maze_size_scaling = size_scaling = maze_size_scaling
@@ -293,9 +305,13 @@ class MazeEnv(gym.Env):
                 ymin + 1 <= self.init_position[1] <= ymax - 1
             ):
                 raise ValueError(f"{self.init_position} is not within limits")
-            # # Doesn't work for now (_valid_xy isn't correct)
-            # if not self._valid_xy(init_position):
-            #     raise ValueError(f"{self.init_position} is blocked")
+        # Check that init_rowcol is valid
+        if init_rowcol is not None:
+            if not (
+                0 <= init_rowcol[0] < len(structure)
+                and 0 <= init_rowcol[1] < len(structure)
+            ):
+                raise ValueError(f"{self.init_rowcol} is not within limits")
 
         # Added to enable video_recording
         self.metadata = {

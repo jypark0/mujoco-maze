@@ -78,7 +78,9 @@ class MazeEnv(gym.Env):
         self._top_down_view = self._task.TOP_DOWN_VIEW
         self._restitution_coef = restitution_coef
 
-        self._maze_structure = structure = self._task.create_maze()
+        self._maze_structure = (
+            self.maze_structure
+        ) = structure = self._task.create_maze()
         # Elevate the maze to allow for falling.
         self.elevated = any(maze_env_utils.MazeCell.CHASM in row for row in structure)
         # Are there any movable blocks?
@@ -304,14 +306,20 @@ class MazeEnv(gym.Env):
             if not (xmin + 1 <= self.init_position[0] <= xmax - 1) or not (
                 ymin + 1 <= self.init_position[1] <= ymax - 1
             ):
-                raise ValueError(f"{self.init_position} is not within limits")
+                raise ValueError(
+                    f"Init_position {self.init_position} is not within limits"
+                )
+
         # Check that init_rowcol is valid
         if init_rowcol is not None:
-            if not (
-                0 <= init_rowcol[0] < len(structure)
-                and 0 <= init_rowcol[1] < len(structure)
+            if (
+                not (
+                    0 <= init_rowcol[0] < len(structure)
+                    and 0 <= init_rowcol[1] < len(structure[0])
+                )
+                or structure[init_rowcol[0]][init_rowcol[1]].is_wall_or_chasm()
             ):
-                raise ValueError(f"{self.init_rowcol} is not within limits")
+                raise ValueError(f"Init_rowcol {self.init_rowcol} is not valid")
 
         # Added to enable video_recording
         self.metadata = {
@@ -524,6 +532,15 @@ class MazeEnv(gym.Env):
 
         return ret
 
+    def valid_rowcol(self):
+        valid_rowcol = []
+        structure = self._maze_structure
+        for i, j in it.product(range(len(structure)), range(len(structure[0]))):
+            if not structure[i][j].is_wall_or_chasm():
+                valid_rowcol.append((i, j))
+
+        return valid_rowcol
+
     def reset(self) -> np.ndarray:
         self.t = 0
         self.wrapped_env.reset()
@@ -545,13 +562,44 @@ class MazeEnv(gym.Env):
         # If init_position is specified
         if self.init_position is not None:
             self.init_pos = self.init_position
+            self.init_rc = self._xy_to_rowcol(*self.init_pos)
+
+        # If init_rowcol is specified
+        elif self.init_rowcol is not None:
+            self.init_rc = self.init_rowcol
+            r, c = self.init_rowcol
+            structure = self._maze_structure
+
+            # Transform r,c into random xy within size_scaling / 2
+            x0, y0 = self._init_torso_x, self._init_torso_y
+            scaling = self._maze_size_scaling
+            xmin, xmax = (c - 0.5) * scaling - x0, (c + 0.5) * scaling - x0
+            ymin, ymax = (r - 0.5) * scaling - y0, (r + 0.5) * scaling - y0
+
+            # Because of collision radius, point has a chance to get stuck near the walls (can't get out)
+            # Add 1 distance if next cell is wall or chasm
+            # bottom
+            if r > 0 and structure[r - 1][c].is_wall_or_chasm():
+                ymin += 1
+            # top
+            if r < len(structure) - 1 and structure[r + 1][c].is_wall_or_chasm():
+                ymax -= 1
+            # left
+            if c > 0 and structure[r][c - 1].is_wall_or_chasm():
+                xmin += 1
+            # right
+            if c < len(structure[0]) - 1 and structure[r][c + 1].is_wall_or_chasm():
+                xmax -= 1
+
+            # Randomly sample anywhere within that cell
+            xy = np.random.uniform([xmin, ymin], [xmax, ymax], 2)
+
+            self.init_pos = xy
+
         # Samples random start position
         elif self.random_start:
-            valid_rowcol = []
+            valid_rowcol = self.valid_rowcol()
             structure = self._maze_structure
-            for i, j in it.product(range(len(structure)), range(len(structure[0]))):
-                if not structure[i][j].is_wall_or_chasm():
-                    valid_rowcol.append((i, j))
 
             # Sample random row and col
             idx = self.np_random.randint(0, len(valid_rowcol))
@@ -584,7 +632,7 @@ class MazeEnv(gym.Env):
                 xmax -= 1
                 x_change = True
 
-            # # Also check corners
+            # # Also check corners (doesn't work)
             # # bottom left corner
             # if r > 0 and c > 0 and structure[r - 1][c - 1].is_wall_or_chasm():
             #     if not y_change:
@@ -621,7 +669,7 @@ class MazeEnv(gym.Env):
             #         ymax -= 1
             #     if not x_change:
             #         xmax -= 1
-            #
+
             # Randomly sample anywhere within that cell
             xy = np.random.uniform([xmin, ymin], [xmax, ymax], 2)
 

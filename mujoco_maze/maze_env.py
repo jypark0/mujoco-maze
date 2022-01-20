@@ -592,7 +592,7 @@ class MazeEnv(gym.Env):
                 xmax -= 1
 
             # Randomly sample anywhere within that cell
-            xy = np.random.uniform([xmin, ymin], [xmax, ymax], 2)
+            xy = self.np_random.uniform([xmin, ymin], [xmax, ymax], 2)
 
             self.init_pos = xy
 
@@ -671,7 +671,7 @@ class MazeEnv(gym.Env):
             #         xmax -= 1
 
             # Randomly sample anywhere within that cell
-            xy = np.random.uniform([xmin, ymin], [xmax, ymax], 2)
+            xy = self.np_random.uniform([xmin, ymin], [xmax, ymax], 2)
 
             self.init_pos = xy
         else:

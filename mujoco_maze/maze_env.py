@@ -751,6 +751,7 @@ class MazeEnv(gym.Env):
 
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, float, bool, dict]:
         self.t += 1
+        done = False
         if self.wrapped_env.MANUAL_COLLISION:
             old_pos = self.wrapped_env.get_xy()
             old_objballs = self._objball_positions()
@@ -781,9 +782,12 @@ class MazeEnv(gym.Env):
             if falls is not None:
                 # Reset to this episodes initial position
                 # Must also reset_model to reset velocities and orientation
-                new_pos = self.init_pos
-                self.wrapped_env.reset_model()
-                self.wrapped_env.set_xy(new_pos)
+                # new_pos = self.init_pos
+                # self.wrapped_env.reset_model()
+                # self.wrapped_env.set_xy(new_pos)
+
+                # Just set done to True
+                done = True
 
         else:
             inner_next_obs, inner_reward, _, info = self.wrapped_env.step(action)
@@ -792,7 +796,7 @@ class MazeEnv(gym.Env):
 
         inner_reward = self._inner_reward_scaling * inner_reward
         outer_reward = self._task.reward(next_obs)
-        done = self._task.termination(next_obs)
+        done = done or self._task.termination(next_obs)
         info["position"] = self.wrapped_env.get_xy()
         return next_obs, inner_reward + outer_reward, done, info
 

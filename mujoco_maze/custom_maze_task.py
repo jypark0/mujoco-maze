@@ -5,14 +5,12 @@ import numpy as np
 
 from mujoco_maze.maze_env_utils import MazeCell
 from mujoco_maze.task_common import (
-    GREEN,
     DistRewardMixIn,
     WayPointMixIn,
     MazeGoal,
     MazeTask,
     Scaling,
     RewardThreshold,
-    euc_dist,
 )
 
 
@@ -200,7 +198,6 @@ class GoalRewardChasmRoom5x11(GoalRewardWallRoom5x11):
 
 class DistRewardChasmRoom5x11(DistRewardMixIn, GoalRewardChasmRoom5x11):
     REWARD_THRESHOLD: RewardThreshold = RewardThreshold(20, 115, None)
-
     pass
 
 
@@ -375,6 +372,61 @@ class WayPointLargeUMaze(WayPointMixIn, GoalRewardLargeUMaze):
         self.waypoint_reward = 0
 
 
+class GoalRewardCorridor7x7(MazeTask):
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(0.9, 0.9, 0.9)
+    PENALTY: float = 0
+    MAZE_SIZE_SCALING: Scaling = Scaling(ant=4.0, point=4.0, swimmer=1.0)
+    INNER_REWARD_SCALING: float = 0
+    RENDER_WIDTH: int = 700
+    RENDER_HEIGHT: int = 500
+    VIEWER_SETUP_KWARGS = {"distance": 1.0, "elevation": -60, "azimuth": 90}
+
+    def __init__(self, scale: float) -> None:
+        super().__init__(scale)
+        self.goals = [MazeGoal(np.array([6.0, 6.0]) * scale)]
+        self.goal_reward = 10
+
+    def reward(self, obs: np.ndarray) -> float:
+        return self.goal_reward if self.termination(obs) else self.PENALTY
+
+    @staticmethod
+    def create_maze() -> List[List[MazeCell]]:
+        E, B, R = MazeCell.EMPTY, MazeCell.BLOCK, MazeCell.ROBOT
+        return [
+            [B, B, B, B, B, B, B, B, B],
+            [B, R, E, B, E, E, E, E, B],
+            [B, E, E, B, E, E, E, E, B],
+            [B, E, E, E, E, E, B, B, B],
+            [B, E, E, E, E, E, E, E, B],
+            [B, B, B, E, E, E, E, E, B],
+            [B, E, E, E, E, B, E, E, B],
+            [B, E, E, E, E, B, E, E, B],
+            [B, B, B, B, B, B, B, B, B],
+        ]
+
+
+class DistRewardCorridor7x7(DistRewardMixIn, GoalRewardCorridor7x7):
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 1000, None)
+
+    def __init__(self, scale: float) -> None:
+        super().__init__(scale)
+        self.goal_reward = 1000
+
+
+class WayPointRewardCorridor7x7(WayPointMixIn, GoalRewardCorridor7x7):
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 1000, None)
+
+    def __init__(self, scale: float) -> None:
+        super().__init__(scale)
+
+        waypoints = [(1, 2), (3, 3), (5, 4)]
+        self.create_waypoints(waypoints)
+        self.precalculate_distances()
+
+        self.goal_reward = 1000
+        self.waypoint_reward = 0
+
+
 class CustomTaskRegistry:
     REGISTRY: Dict[str, List[Type[MazeTask]]] = {
         "Room3x5": [GoalRewardRoom3x5, DistRewardRoom3x5, WayPointRoom3x5],
@@ -394,10 +446,12 @@ class CustomTaskRegistry:
             DistRewardWallRoom7x15,
             WayPointWallRoom7x15,
         ],
-        "ChasmRoom7x15": [
-            GoalRewardChasmRoom7x15,
-        ],
         "LargeUMaze": [GoalRewardLargeUMaze, DistRewardLargeUMaze, WayPointLargeUMaze],
+        "Corridor7x7": [
+            GoalRewardCorridor7x7,
+            DistRewardCorridor7x7,
+            WayPointRewardCorridor7x7,
+        ],
     }
 
     @staticmethod

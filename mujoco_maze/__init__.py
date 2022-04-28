@@ -18,6 +18,8 @@ from mujoco_maze.swimmer import SwimmerEnv
 
 from mujoco_maze.point_fixed_start import PointFixedStartEnv
 
+max_episode_steps = 500
+
 
 def orig_register(task_registry):
     for maze_id in task_registry.keys():
@@ -34,7 +36,7 @@ def orig_register(task_registry):
                         maze_size_scaling=point_scale,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
-                    max_episode_steps=1000,
+                    max_episode_steps=max_episode_steps,
                     reward_threshold=task_cls.REWARD_THRESHOLD,
                 )
 
@@ -50,7 +52,7 @@ def orig_register(task_registry):
                         maze_size_scaling=ant_scale,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
-                    max_episode_steps=1000,
+                    max_episode_steps=max_episode_steps,
                     reward_threshold=task_cls.REWARD_THRESHOLD,
                 )
 
@@ -66,7 +68,7 @@ def orig_register(task_registry):
                         maze_size_scaling=swimmer_scale,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
-                    max_episode_steps=1000,
+                    max_episode_steps=max_episode_steps,
                     reward_threshold=task_cls.REWARD_THRESHOLD,
                 )
                 # Swimmer
@@ -79,7 +81,7 @@ def orig_register(task_registry):
                         maze_size_scaling=swimmer_scale,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
-                    max_episode_steps=1000,
+                    max_episode_steps=max_episode_steps,
                     reward_threshold=task_cls.REWARD_THRESHOLD,
                 )
 
@@ -102,7 +104,7 @@ def custom_register(
                         maze_size_scaling=point_scale,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
-                    max_episode_steps=1000,
+                    max_episode_steps=max_episode_steps,
                     reward_threshold=point_reward_threshold,
                 )
 
@@ -119,7 +121,7 @@ def custom_register(
                         maze_size_scaling=ant_scale,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
-                    max_episode_steps=1000,
+                    max_episode_steps=max_episode_steps,
                     reward_threshold=ant_reward_threshold,
                 )
 
@@ -136,7 +138,7 @@ def custom_register(
                         maze_size_scaling=swimmer_scale,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
-                    max_episode_steps=1000,
+                    max_episode_steps=max_episode_steps,
                     reward_threshold=swimmer_reward_threshold,
                 )
                 # Swimmer
@@ -149,7 +151,7 @@ def custom_register(
                         maze_size_scaling=swimmer_scale,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
-                    max_episode_steps=1000,
+                    max_episode_steps=max_episode_steps,
                     reward_threshold=swimmer_reward_threshold,
                 )
 
@@ -177,7 +179,7 @@ def expert_register(expert_task_registry):
                         maze_size_scaling=point_scale,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
-                    max_episode_steps=1000,
+                    max_episode_steps=max_episode_steps,
                     reward_threshold=reward_thresholds.point[i],
                 )
 
@@ -193,7 +195,7 @@ def expert_register(expert_task_registry):
                         maze_size_scaling=ant_scale,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
-                    max_episode_steps=1000,
+                    max_episode_steps=max_episode_steps,
                     reward_threshold=reward_thresholds.ant[i],
                 )
 
@@ -209,7 +211,7 @@ def expert_register(expert_task_registry):
                         maze_size_scaling=swimmer_scale,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
-                    max_episode_steps=1000,
+                    max_episode_steps=max_episode_steps,
                     reward_threshold=reward_thresholds.swimmer[i],
                 )
                 # Swimmer
@@ -223,7 +225,7 @@ def expert_register(expert_task_registry):
                         maze_size_scaling=swimmer_scale,
                         inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                     ),
-                    max_episode_steps=1000,
+                    max_episode_steps=max_episode_steps,
                     reward_threshold=reward_thresholds.swimmer[i],
                 )
 
@@ -231,7 +233,7 @@ def expert_register(expert_task_registry):
 orig_register(TaskRegistry)
 custom_register(CustomTaskRegistry, "mujoco_maze.maze_env:MazeEnv", "")
 custom_register(CustomTaskRegistry, "mujoco_maze.goal_maze_env:GoalMazeEnv", "Goal")
-expert_register(ExpertTaskRegistry)
+# expert_register(ExpertTaskRegistry)
 
 # Register FixedStart envs separately
 for maze_id in ["Room3x10", "WallRoom5x11", "ChasmRoom5x11"]:
@@ -249,7 +251,7 @@ for maze_id in ["Room3x10", "WallRoom5x11", "ChasmRoom5x11"]:
                     maze_size_scaling=point_scale,
                     inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                 ),
-                max_episode_steps=1000,
+                max_episode_steps=max_episode_steps,
                 reward_threshold=point_reward_threshold,
             )
             register(
@@ -261,7 +263,7 @@ for maze_id in ["Room3x10", "WallRoom5x11", "ChasmRoom5x11"]:
                     maze_size_scaling=point_scale,
                     inner_reward_scaling=task_cls.INNER_REWARD_SCALING,
                 ),
-                max_episode_steps=1000,
+                max_episode_steps=max_episode_steps,
                 reward_threshold=point_reward_threshold,
             )
 

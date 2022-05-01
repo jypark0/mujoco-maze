@@ -26,7 +26,7 @@ class GoalRewardRoom3x5(MazeTask):
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
         self.goals = [MazeGoal(np.array([4.0, 0.0]) * scale)]
-        self.goal_reward = 10
+        self.goal_reward = 100
 
     def reward(self, obs: np.ndarray) -> float:
         return self.goal_reward if self.termination(obs) else self.PENALTY
@@ -77,7 +77,7 @@ class GoalRewardRoom3x10(MazeTask):
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
         self.goals = [MazeGoal(np.array([9.0, 0.0]) * scale)]
-        self.goal_reward = 10
+        self.goal_reward = 100
 
     def reward(self, obs: np.ndarray) -> float:
         return self.goal_reward if self.termination(obs) else self.PENALTY
@@ -95,7 +95,7 @@ class GoalRewardRoom3x10(MazeTask):
 
 
 class DistRewardRoom3x10(DistRewardMixIn, GoalRewardRoom3x10):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(20, 115, None)
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(200, 200, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -103,7 +103,7 @@ class DistRewardRoom3x10(DistRewardMixIn, GoalRewardRoom3x10):
 
 
 class WayPointRoom3x10(WayPointMixIn, GoalRewardRoom3x10):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(20, 115, None)
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(200, 200, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -132,7 +132,7 @@ class GoalRewardWallRoom5x11(MazeTask):
                 region_size=(scale / 4, scale / 4),
             )
         ]
-        self.goal_reward = 10
+        self.goal_reward = 100
 
     def termination(self, obs: np.ndarray) -> bool:
         if (
@@ -160,7 +160,7 @@ class GoalRewardWallRoom5x11(MazeTask):
 
 
 class DistRewardWallRoom5x11(DistRewardMixIn, GoalRewardWallRoom5x11):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(20, 115, None)
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-70, -185, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -168,7 +168,7 @@ class DistRewardWallRoom5x11(DistRewardMixIn, GoalRewardWallRoom5x11):
 
 
 class WayPointWallRoom5x11(WayPointMixIn, GoalRewardWallRoom5x11):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(20, 115, None)
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-70, -185, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -197,12 +197,12 @@ class GoalRewardChasmRoom5x11(GoalRewardWallRoom5x11):
 
 
 class DistRewardChasmRoom5x11(DistRewardMixIn, GoalRewardChasmRoom5x11):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(20, 115, None)
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-70, 115, None)
     pass
 
 
 class WayPointChasmRoom5x11(WayPointMixIn, GoalRewardChasmRoom5x11):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(20, 115, None)
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-70, 115, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -232,7 +232,7 @@ class GoalRewardWallRoom7x15(MazeTask):
                 region_size=(scale / 4, 1.75 * scale),
             )
         ]
-        self.goal_reward = 10
+        self.goal_reward = 100
 
     def termination(self, obs: np.ndarray) -> bool:
         if obs[0] >= 14 * self.scale and obs[1] >= 0.0 * self.scale:
@@ -244,7 +244,7 @@ class GoalRewardWallRoom7x15(MazeTask):
 
     @staticmethod
     def create_maze() -> List[List[MazeCell]]:
-        E, B, C, R = MazeCell.EMPTY, MazeCell.BLOCK, MazeCell.CHASM, MazeCell.ROBOT
+        E, B, R = MazeCell.EMPTY, MazeCell.BLOCK, MazeCell.ROBOT
         return [
             [B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B],
             [B, E, E, E, E, B, E, E, E, E, E, B, E, E, E, E, B],
@@ -314,7 +314,7 @@ class GoalRewardLargeUMaze(MazeTask):
                 region_size=(scale / 4, scale / 4),
             )
         ]
-        self.goal_reward = 10
+        self.goal_reward = 100
 
     def termination(self, obs: np.ndarray) -> bool:
         if obs[0] <= 0 and obs[1] >= 4.0 * self.scale:
@@ -327,18 +327,6 @@ class GoalRewardLargeUMaze(MazeTask):
     @staticmethod
     def create_maze() -> List[List[MazeCell]]:
         E, B, R = MazeCell.EMPTY, MazeCell.BLOCK, MazeCell.ROBOT
-        # return [
-        #     [B, B, B, B, B, B],
-        #     [B, E, E, E, E, B],
-        #     [B, R, E, E, E, B],
-        #     [B, E, E, E, E, B],
-        #     [B, B, B, B, E, B],
-        #     [B, B, B, B, E, B],
-        #     [B, E, E, E, E, B],
-        #     [B, E, E, E, E, B],
-        #     [B, E, E, E, E, B],
-        #     [B, B, B, B, B, B],
-        # ]
         return [
             [B, B, B, B, B],
             [B, R, E, E, B],
@@ -384,7 +372,7 @@ class GoalRewardCorridor7x7(MazeTask):
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
         self.goals = [MazeGoal(np.array([6.0, 6.0]) * scale)]
-        self.goal_reward = 10
+        self.goal_reward = 100
 
     def reward(self, obs: np.ndarray) -> float:
         return self.goal_reward if self.termination(obs) else self.PENALTY
@@ -406,7 +394,7 @@ class GoalRewardCorridor7x7(MazeTask):
 
 
 class DistRewardCorridor7x7(DistRewardMixIn, GoalRewardCorridor7x7):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 1000, None)
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 240, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -414,12 +402,12 @@ class DistRewardCorridor7x7(DistRewardMixIn, GoalRewardCorridor7x7):
 
 
 class WayPointRewardCorridor7x7(WayPointMixIn, GoalRewardCorridor7x7):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 1000, None)
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 240, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
 
-        waypoints = [(1, 2), (3, 3), (5, 4)]
+        waypoints = [(3, 3)]
         self.create_waypoints(waypoints)
         self.precalculate_distances()
 

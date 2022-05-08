@@ -132,21 +132,25 @@ class GoalRewardWallRoom5x11(MazeTask):
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
-        self.goals = [
-            MazeGoal(
-                np.array([10.25, 0.0]) * scale,
-                region_size=(scale / 4, scale / 4),
-            )
-        ]
+        # Goal region
+        # self.goals = [
+        #     MazeGoal(
+        #         np.array([10.25, 0.0]) * scale,
+        #         region_size=(scale / 4, scale / 4),
+        #     )
+        # ]
+
+        # Goal point
+        self.goals = [MazeGoal(np.array([10.0, 0.0]) * scale)]
         self.goal_reward = 1000
 
-    def termination(self, obs: np.ndarray) -> bool:
-        if (
-            obs[0] >= 10.0 * self.scale
-            and -0.25 * self.scale <= obs[1] <= 0.25 * self.scale
-        ):
-            return True
-        return False
+    # def termination(self, obs: np.ndarray) -> bool:
+    #     if (
+    #         obs[0] >= 10.0 * self.scale
+    #         and -0.25 * self.scale <= obs[1] <= 0.25 * self.scale
+    #     ):
+    #         return True
+    #     return False
 
     def reward(self, obs: np.ndarray) -> float:
         return self.goal_reward if self.termination(obs) else self.PENALTY
@@ -301,7 +305,7 @@ class WayPointWallRoom7x15(WayPointMixIn, GoalRewardWallRoom7x15):
 class GoalRewardLargeUMaze(MazeTask):
     REWARD_THRESHOLD: RewardThreshold = RewardThreshold(0.9, 0.9, 0.9)
     PENALTY: float = 0
-    MAZE_SIZE_SCALING: Scaling = Scaling(8.0, 8.0, 4.0)
+    MAZE_SIZE_SCALING: Scaling = Scaling(4.0, 4.0, 2.0)
     INNER_REWARD_SCALING: float = 0
     RENDER_HEIGHT = 500
     RENDER_WIDTH = 500
@@ -309,18 +313,22 @@ class GoalRewardLargeUMaze(MazeTask):
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
-        self.goals = [
-            MazeGoal(
-                np.array([-0.25, 4.25]) * scale,
-                region_size=(scale / 4, scale / 4),
-            )
-        ]
+        # Goal region
+        # self.goals = [
+        #     MazeGoal(
+        #         np.array([-0.25, 4.25]) * scale,
+        #         region_size=(scale / 4, scale / 4),
+        #     )
+        # ]
+
+        # Goal point
+        self.goals = [MazeGoal(np.array([0.0, 6.0]) * scale)]
         self.goal_reward = 1000
 
-    def termination(self, obs: np.ndarray) -> bool:
-        if obs[0] <= 0 and obs[1] >= 4.0 * self.scale:
-            return True
-        return False
+    # def termination(self, obs: np.ndarray) -> bool:
+    #     if obs[0] <= 0 and obs[1] >= 4.0 * self.scale:
+    #         return True
+    #     return False
 
     def reward(self, obs: np.ndarray) -> float:
         return self.goal_reward if self.termination(obs) else self.PENALTY
@@ -329,13 +337,15 @@ class GoalRewardLargeUMaze(MazeTask):
     def create_maze() -> List[List[MazeCell]]:
         E, B, R = MazeCell.EMPTY, MazeCell.BLOCK, MazeCell.ROBOT
         return [
-            [B, B, B, B, B],
-            [B, R, E, E, B],
-            [B, E, E, E, B],
-            [B, B, B, E, B],
-            [B, E, E, E, B],
-            [B, E, E, E, B],
-            [B, B, B, B, B],
+            [B, B, B, B, B, B],
+            [B, R, E, E, E, B],
+            [B, E, E, E, E, B],
+            [B, E, E, E, E, B],
+            [B, B, B, B, E, B],
+            [B, E, E, E, E, B],
+            [B, E, E, E, E, B],
+            [B, E, E, E, E, B],
+            [B, B, B, B, B, B],
         ]
 
 
@@ -356,7 +366,7 @@ class WayPointLargeUMaze(WayPointMixIn, GoalRewardLargeUMaze):
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
 
-        waypoints = [(1.5, 1), (2, 2), (1.5, 3)]
+        waypoints = [(2.5, 1.5), (3, 3), (2.5, 4.5)]
         self.create_waypoints(waypoints)
         self.precalculate_distances()
 

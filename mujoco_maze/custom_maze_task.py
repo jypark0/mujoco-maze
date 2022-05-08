@@ -337,15 +337,15 @@ class GoalRewardLargeUMaze(MazeTask):
     def create_maze() -> List[List[MazeCell]]:
         E, B, R = MazeCell.EMPTY, MazeCell.BLOCK, MazeCell.ROBOT
         return [
-            [B, B, B, B, B, B],
-            [B, R, E, E, E, B],
-            [B, E, E, E, E, B],
-            [B, E, E, E, E, B],
-            [B, B, B, B, E, B],
-            [B, E, E, E, E, B],
-            [B, E, E, E, E, B],
-            [B, E, E, E, E, B],
-            [B, B, B, B, B, B],
+            [B, B, B, B, B, B, B],
+            [B, R, E, E, E, E, B],
+            [B, E, E, E, E, E, B],
+            [B, E, E, E, E, E, B],
+            [B, B, B, B, B, E, B],
+            [B, E, E, E, E, E, B],
+            [B, E, E, E, E, E, B],
+            [B, E, E, E, E, E, B],
+            [B, B, B, B, B, B, B],
         ]
 
 
@@ -361,12 +361,12 @@ class WayPointLargeUMaze(WayPointMixIn, GoalRewardLargeUMaze):
     # for dt0.03, gear10
     # REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-10, 210, None)
     # for dt0.02, gear30
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 210, None)
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 1000, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
 
-        waypoints = [(2.5, 1.5), (3, 3), (2.5, 4.5)]
+        waypoints = [(3, 1.5), (4, 3), (3, 4.5)]
         self.create_waypoints(waypoints)
         self.precalculate_distances()
 

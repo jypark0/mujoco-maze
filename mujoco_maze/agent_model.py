@@ -3,10 +3,10 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+import mujoco_py
 import numpy as np
 from gym.envs.mujoco.mujoco_env import MujocoEnv
 from gym.utils import EzPickle
-import mujoco_py
 
 DEFAULT_SIZE = 500
 

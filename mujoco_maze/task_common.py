@@ -1,6 +1,8 @@
-import numpy as np
-from typing import List, NamedTuple, Optional, Sequence
 from abc import ABC, abstractmethod
+from typing import List, NamedTuple, Optional, Sequence
+
+import numpy as np
+
 from mujoco_maze.maze_env_utils import MazeCell
 
 

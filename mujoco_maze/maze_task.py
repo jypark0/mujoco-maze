@@ -6,7 +6,7 @@ from typing import Dict, List, Tuple, Type
 import numpy as np
 
 from mujoco_maze.maze_env_utils import MazeCell
-from mujoco_maze.task_common import MazeGoal, MazeTask, DistRewardMixIn, Scaling, GREEN
+from mujoco_maze.task_common import GREEN, DistRewardMixIn, MazeGoal, MazeTask, Scaling
 
 
 class GoalRewardUMaze(MazeTask):

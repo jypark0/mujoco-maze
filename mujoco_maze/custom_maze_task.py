@@ -6,11 +6,11 @@ import numpy as np
 from mujoco_maze.maze_env_utils import MazeCell
 from mujoco_maze.task_common import (
     DistRewardMixIn,
-    WayPointMixIn,
     MazeGoal,
     MazeTask,
-    Scaling,
     RewardThreshold,
+    Scaling,
+    WayPointMixIn,
 )
 
 
@@ -26,7 +26,7 @@ class GoalRewardRoom3x5(MazeTask):
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
         self.goals = [MazeGoal(np.array([4.0, 0.0]) * scale)]
-        self.goal_reward = 100
+        self.goal_reward = 1000
 
     def reward(self, obs: np.ndarray) -> float:
         return self.goal_reward if self.termination(obs) else self.PENALTY
@@ -77,7 +77,7 @@ class GoalRewardRoom3x10(MazeTask):
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
         self.goals = [MazeGoal(np.array([9.0, 0.0]) * scale)]
-        self.goal_reward = 100
+        self.goal_reward = 1000
 
     def reward(self, obs: np.ndarray) -> float:
         return self.goal_reward if self.termination(obs) else self.PENALTY
@@ -132,7 +132,7 @@ class GoalRewardWallRoom5x11(MazeTask):
                 region_size=(scale / 4, scale / 4),
             )
         ]
-        self.goal_reward = 100
+        self.goal_reward = 1000
 
     def termination(self, obs: np.ndarray) -> bool:
         if (
@@ -232,7 +232,7 @@ class GoalRewardWallRoom7x15(MazeTask):
                 region_size=(scale / 4, 1.75 * scale),
             )
         ]
-        self.goal_reward = 100
+        self.goal_reward = 1000
 
     def termination(self, obs: np.ndarray) -> bool:
         if obs[0] >= 14 * self.scale and obs[1] >= 0.0 * self.scale:
@@ -297,7 +297,7 @@ class GoalRewardLargeUMaze(MazeTask):
                 region_size=(scale / 4, scale / 4),
             )
         ]
-        self.goal_reward = 100
+        self.goal_reward = 1000
 
     def termination(self, obs: np.ndarray) -> bool:
         if obs[0] <= 0 and obs[1] >= 4.0 * self.scale:
@@ -355,7 +355,7 @@ class GoalRewardCorridor7x7(MazeTask):
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
         self.goals = [MazeGoal(np.array([6.0, 6.0]) * scale)]
-        self.goal_reward = 100
+        self.goal_reward = 1000
 
     def reward(self, obs: np.ndarray) -> float:
         return self.goal_reward if self.termination(obs) else self.PENALTY

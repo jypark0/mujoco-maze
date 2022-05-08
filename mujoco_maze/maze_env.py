@@ -708,6 +708,7 @@ class MazeEnv(gym.Env):
         if mode == "human" and self._websock_port is not None:
             if self._mj_offscreen_viewer is None:
                 from mujoco_py import MjRenderContextOffscreen as MjRCO
+
                 from mujoco_maze.websock_viewer import start_server
 
                 self._mj_offscreen_viewer = MjRCO(self.wrapped_env.sim)
@@ -798,6 +799,7 @@ class MazeEnv(gym.Env):
         outer_reward = self._task.reward(next_obs)
         done = done or self._task.termination(next_obs)
         info["position"] = self.wrapped_env.get_xy()
+        info["is_success"] = self._task.termination(next_obs)
         return next_obs, inner_reward + outer_reward, done, info
 
     def close(self) -> None:
@@ -815,7 +817,7 @@ def _add_objball_hinge(
     size: float,
 ) -> None:
     body = ET.SubElement(worldbody, "body", name=f"objball_{i}_{j}", pos=f"{x} {y} 0")
-    mass = 0.0001 * (size ** 3)
+    mass = 0.0001 * (size**3)
     ET.SubElement(
         body,
         "geom",

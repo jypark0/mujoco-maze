@@ -37,4 +37,3 @@
     <motor ctrllimited="true" ctrlrange="-1 1" gear="150.0" joint="rot3"/>
   </actuator>
 </mujoco>
-

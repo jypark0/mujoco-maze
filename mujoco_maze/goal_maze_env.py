@@ -2,12 +2,13 @@ import itertools as it
 import os
 import tempfile
 import xml.etree.ElementTree as ET
-from typing import Any, List, Optional, Tuple, Type
 from collections import OrderedDict
+from typing import Any, List, Optional, Tuple, Type
 
 import gym
-from gym.spaces import Dict, Box
 import numpy as np
+from gym.spaces import Box, Dict
+
 from mujoco_maze import maze_env_utils, maze_task
 from mujoco_maze.agent_model import AgentModel
 from mujoco_maze.maze_env import MazeEnv

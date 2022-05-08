@@ -6,7 +6,6 @@ import fastapi
 import uvicorn
 from PIL import Image
 
-
 HTML = """
 <!DOCTYPE html>
 <html>

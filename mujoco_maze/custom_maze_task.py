@@ -126,9 +126,9 @@ class GoalRewardWallRoom5x11(MazeTask):
     PENALTY: float = 0
     MAZE_SIZE_SCALING: Scaling = Scaling(4.0, 4.0, 2.0)
     INNER_REWARD_SCALING: float = 0
-    RENDER_WIDTH = 1100
-    RENDER_HEIGHT = 500
-    VIEWER_SETUP_KWARGS = {"distance": 0.7, "elevation": -60, "azimuth": 90}
+    RENDER_WIDTH = 500
+    RENDER_HEIGHT = 300
+    VIEWER_SETUP_KWARGS = {"distance": 0.9, "elevation": -60, "azimuth": 90}
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -310,7 +310,7 @@ class GoalRewardLargeUMaze(MazeTask):
     INNER_REWARD_SCALING: float = 0
     RENDER_HEIGHT = 500
     RENDER_WIDTH = 500
-    VIEWER_SETUP_KWARGS = {"distance": 0.9, "elevation": -60, "azimuth": 90}
+    VIEWER_SETUP_KWARGS = {"distance": 1.2, "elevation": -60, "azimuth": 90}
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -391,9 +391,9 @@ class GoalRewardCorridor7x7(MazeTask):
     PENALTY: float = 0
     MAZE_SIZE_SCALING: Scaling = Scaling(ant=4.0, point=4.0, swimmer=1.0)
     INNER_REWARD_SCALING: float = 0
-    RENDER_WIDTH: int = 700
-    RENDER_HEIGHT: int = 500
-    VIEWER_SETUP_KWARGS = {"distance": 1.0, "elevation": -60, "azimuth": 90}
+    RENDER_WIDTH: int = 500
+    RENDER_HEIGHT: int = 400
+    VIEWER_SETUP_KWARGS = {"distance": 1.2, "elevation": -60, "azimuth": 90}
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)

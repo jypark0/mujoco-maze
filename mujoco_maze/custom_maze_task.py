@@ -95,8 +95,10 @@ class GoalRewardRoom3x10(MazeTask):
 
 
 class DistRewardRoom3x10(DistRewardMixIn, GoalRewardRoom3x10):
-    # REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-15, 170, None)
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-10, 170, None)
+    # for dt0.03, gear10
+    # REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-10, 170, None)
+    # for dt0.02, gear30
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 170, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -104,7 +106,10 @@ class DistRewardRoom3x10(DistRewardMixIn, GoalRewardRoom3x10):
 
 
 class WayPointRoom3x10(WayPointMixIn, GoalRewardRoom3x10):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-10, 170, None)
+    # for dt0.03, gear10
+    # REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-10, 170, None)
+    # for dt0.02, gear30
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 170, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -161,7 +166,10 @@ class GoalRewardWallRoom5x11(MazeTask):
 
 
 class DistRewardWallRoom5x11(DistRewardMixIn, GoalRewardWallRoom5x11):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-280, -70, None)
+    # for dt0.03, gear10
+    # REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-280, -70, None)
+    # for dt0.02, gear30
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, -70, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -169,7 +177,10 @@ class DistRewardWallRoom5x11(DistRewardMixIn, GoalRewardWallRoom5x11):
 
 
 class WayPointWallRoom5x11(WayPointMixIn, GoalRewardWallRoom5x11):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-280, -70, None)
+    # for dt0.03, gear10
+    # REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-280, -70, None)
+    # for dt0.02, gear30
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, -70, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -198,12 +209,18 @@ class GoalRewardChasmRoom5x11(GoalRewardWallRoom5x11):
 
 
 class DistRewardChasmRoom5x11(DistRewardMixIn, GoalRewardChasmRoom5x11):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-280, -70, None)
+    # for dt0.03, gear10
+    # REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-280, -70, None)
+    # for dt0.02, gear30
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, -70, None)
     pass
 
 
 class WayPointChasmRoom5x11(WayPointMixIn, GoalRewardChasmRoom5x11):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-280, -70, None)
+    # for dt0.03, gear10
+    # REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-280, -70, None)
+    # for dt0.02, gear30
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, -70, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -331,7 +348,10 @@ class DistRewardLargeUMaze(DistRewardMixIn, GoalRewardLargeUMaze):
 
 
 class WayPointLargeUMaze(WayPointMixIn, GoalRewardLargeUMaze):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-10, 210, None)
+    # for dt0.03, gear10
+    # REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-10, 210, None)
+    # for dt0.02, gear30
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 210, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
@@ -386,7 +406,10 @@ class DistRewardCorridor7x7(DistRewardMixIn, GoalRewardCorridor7x7):
 
 
 class WayPointRewardCorridor7x7(WayPointMixIn, GoalRewardCorridor7x7):
-    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(125, 225, None)
+    # for dt0.03, gear10
+    # REWARD_THRESHOLD: RewardThreshold = RewardThreshold(125, 225, None)
+    # for dt0.02, gear30
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 225, None)
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)

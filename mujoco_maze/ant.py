@@ -36,7 +36,7 @@ def q_mult(a, b):  # multiply two quaternion
 
 
 class AntEnv(AgentModel):
-    FILE: str = "ant_dt2_gear30.xml"
+    FILE: str = "ant_dt3_gear10.xml"
     ORI_IND: int = 3
     MANUAL_COLLISION: bool = False
     OBJBALL_TYPE: str = "freejoint"

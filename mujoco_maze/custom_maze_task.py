@@ -314,14 +314,6 @@ class GoalRewardLargeUMaze(MazeTask):
 
     def __init__(self, scale: float) -> None:
         super().__init__(scale)
-        # Goal region
-        # self.goals = [
-        #     MazeGoal(
-        #         np.array([-0.25, 4.25]) * scale,
-        #         region_size=(scale / 4, scale / 4),
-        #     )
-        # ]
-
         # Goal point
         # self.goals = [MazeGoal(np.array([0.0, 6.0]) * scale)]
         self.goals = [MazeGoal(np.array([0.0, 4.0]) * scale)]
@@ -369,6 +361,75 @@ class DistRewardLargeUMaze(DistRewardMixIn, GoalRewardLargeUMaze):
 
 
 class WayPointLargeUMaze(WayPointMixIn, GoalRewardLargeUMaze):
+    # for dt0.03, gear10 with smaller maze
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-10, 210, None)
+    # for dt0.02, gear30
+    # REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-250, -100, None)
+
+    def __init__(self, scale: float) -> None:
+        super().__init__(scale)
+
+        # smaller umaze
+        waypoints = [(1.5, 1), (2, 2), (1.5, 3)]
+        # waypoints = [(3, 1.5), (4, 3), (3, 4.5)]
+        self.create_waypoints(waypoints)
+        self.precalculate_distances()
+
+        self.goal_reward = 1000
+        self.waypoint_reward = 0
+
+
+class GoalRewardRegionUMaze(MazeTask):
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(0.9, 0.9, 0.9)
+    PENALTY: float = 0
+    MAZE_SIZE_SCALING: Scaling = Scaling(8.0, 8.0, 4.0)
+    INNER_REWARD_SCALING: float = 0
+    RENDER_HEIGHT = 500
+    RENDER_WIDTH = 500
+    VIEWER_SETUP_KWARGS = {"distance": 1.2, "elevation": -60, "azimuth": 90}
+
+    def __init__(self, scale: float) -> None:
+        super().__init__(scale)
+        # Goal region
+        self.goals = [
+            MazeGoal(
+                np.array([-0.25, 4.25]) * scale,
+                region_size=(scale / 4, scale / 4),
+            )
+        ]
+        self.goal_reward = 1000
+
+    def termination(self, obs: np.ndarray) -> bool:
+        if obs[0] <= 0 and obs[1] >= 4.0 * self.scale:
+            return True
+        return False
+
+    def reward(self, obs: np.ndarray) -> float:
+        return self.goal_reward if self.termination(obs) else self.PENALTY
+
+    @staticmethod
+    def create_maze() -> List[List[MazeCell]]:
+        E, B, R = MazeCell.EMPTY, MazeCell.BLOCK, MazeCell.ROBOT
+        return [
+            [B, B, B, B, B],
+            [B, R, E, E, B],
+            [B, E, E, E, B],
+            [B, B, B, E, B],
+            [B, E, E, E, B],
+            [B, E, E, E, B],
+            [B, B, B, B, B],
+        ]
+
+
+class DistRewardRegionUMaze(DistRewardMixIn, GoalRewardRegionUMaze):
+    REWARD_THRESHOLD: RewardThreshold = RewardThreshold(1000, 1000, None)
+
+    def __init__(self, scale: float) -> None:
+        super().__init__(scale)
+        self.goal_reward = 1000
+
+
+class WayPointRegionUMaze(WayPointMixIn, GoalRewardRegionUMaze):
     # for dt0.03, gear10 with smaller maze
     REWARD_THRESHOLD: RewardThreshold = RewardThreshold(-10, 210, None)
     # for dt0.02, gear30
@@ -465,6 +526,11 @@ class CustomTaskRegistry:
             WayPointWallRoom7x15,
         ],
         "LargeUMaze": [GoalRewardLargeUMaze, DistRewardLargeUMaze, WayPointLargeUMaze],
+        "RegionUMaze": [
+            GoalRewardRegionUMaze,
+            DistRewardRegionUMaze,
+            WayPointRegionUMaze,
+        ],
         "Corridor7x7": [
             GoalRewardCorridor7x7,
             DistRewardCorridor7x7,

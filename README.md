@@ -6,12 +6,7 @@
 Some maze environments for reinforcement learning (RL) based on [mujoco-py]
 and [openai gym][gym].
 
-Thankfully, this project is based on the code from  [rllab] and
-[tensorflow/models][models].
-
-Note that [d4rl] and [dm_control] have similar maze
-environments, and you can also check them.
-But, if you want more customizable or minimal one, I recommend this.
+This repo is forked from https://github.com/kngwyu/mujoco-maze and includes some custom environments like RegionUMaze, and WallRoom5x11. The ant agent is modified as well. It also includes goal-oriented versions of the environments. See `custom_maze_task.py` for the list of new environments.
 
 ## Usage
 

@@ -24,9 +24,14 @@ class PointEnv(AgentModel):
     VELOCITY_LIMITS: float = 10.0
 
     def __init__(
-        self, file_path: Optional[str] = None, viewer_setup_kwargs: dict = None
+        self,
+        file_path: Optional[str] = None,
+        viewer_setup_kwargs: dict = None,
+        reset_noise_scale: float = 0.1,
     ) -> None:
         super().__init__(file_path, 1, viewer_setup_kwargs)
+        self._reset_noise_scale = reset_noise_scale
+
         high = np.inf * np.ones(6, dtype=np.float32)
         # high[3:] = self.VELOCITY_LIMITS * 1.2
         high[self.ORI_IND] = np.pi
@@ -70,10 +75,17 @@ class PointEnv(AgentModel):
         )
 
     def reset_model(self):
+        noise_low = -self._reset_noise_scale
+        noise_high = self._reset_noise_scale
+
         qpos = self.init_qpos + self.np_random.uniform(
-            size=self.sim.model.nq, low=-0.1, high=0.1
+            size=self.sim.model.nq, low=noise_low, high=noise_high
         )
-        qvel = self.init_qvel + self.np_random.randn(self.sim.model.nv) * 0.1
+        qvel = (
+            self.init_qvel
+            + self._reset_noise_scale
+            * self.np_random.standard_normal(self.sim.model.nv)
+        )
 
         # For debugging
         # qvel = self.init_qvel
